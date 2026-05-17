@@ -1,13 +1,11 @@
 [build]
   publish = "dist/public"
-  functions = "functions"
 
 [[redirects]]
-  from = "/api/frenet/*"
+  from = "/frenet-api/*"
   to = "https://api.frenet.com.br/api/:splat"
   status = 200
   force = true
-  headers = {X-From = "Netlify"}
 
 [[redirects]]
   from = "/*"
