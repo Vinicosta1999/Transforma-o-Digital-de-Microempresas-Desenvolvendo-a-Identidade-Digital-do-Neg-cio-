@@ -39,7 +39,8 @@ export default function Checkout() {
 
   const handleCEPChange = async (cep: string) => {
     const cepFormatado = formatarCEP(cep);
-    setEndereco({ ...endereco, cep: cepFormatado });
+    const novoEndereco = { ...endereco, cep: cepFormatado };
+    setEndereco(novoEndereco);
 
     const cepLimpo = cep.replace(/\D/g, '');
     if (cepLimpo.length === 8) {
@@ -47,16 +48,20 @@ export default function Checkout() {
       try {
         const dadosEndereco = await buscarCEP(cepLimpo);
         if (dadosEndereco) {
-          setEndereco({
-            ...endereco,
+          const enderecoCompleto = {
+            ...novoEndereco,
             cep: dadosEndereco.cep,
             rua: dadosEndereco.rua,
             bairro: dadosEndereco.bairro,
             cidade: dadosEndereco.cidade,
             estado: dadosEndereco.estado,
             complemento: dadosEndereco.complemento || '',
-          });
+          };
+          setEndereco(enderecoCompleto);
           toast.success('Endereço preenchido automaticamente!');
+          
+          // Disparar cálculo de frete automaticamente após preencher endereço
+          await handleCalcularFreteAutomatico(enderecoCompleto);
         } else {
           toast.error('CEP não encontrado');
         }
@@ -65,6 +70,39 @@ export default function Checkout() {
       } finally {
         setCarregando(false);
       }
+    }
+  };
+
+  const handleCalcularFreteAutomatico = async (enderecoAtual: typeof endereco) => {
+    if (!enderecoAtual.cep || !validarCEP(enderecoAtual.cep)) return;
+
+    try {
+      const produtosFrete = carrinho.itens.map(item => {
+        const produtoReal = PRODUTOS.find(p => p.id === item.produto_id);
+        return {
+          id: item.produto_id,
+          nome: produtoReal?.nome || 'Produto',
+          peso: produtoReal?.peso || 500,
+          comprimento: produtoReal?.dimensoes.comprimento || 20,
+          largura: produtoReal?.dimensoes.largura || 20,
+          altura: produtoReal?.dimensoes.altura || 20,
+          valor: item.preco_unitario,
+          quantidade: item.quantidade
+        };
+      });
+
+      const resultado = await calcularFrete(produtosFrete, enderecoAtual);
+      
+      if (resultado.opcoes.length > 0) {
+        setOpcoesFrete(resultado.opcoes);
+        setFrete(resultado.opcoes[0]);
+        // Se já estiver na etapa de frete ou endereço, garante que as opções apareçam
+        if (etapa === 'endereco') {
+           // Opcional: avançar automaticamente ou apenas mostrar as opções abaixo
+        }
+      }
+    } catch (error) {
+      console.error('Erro no cálculo automático:', error);
     }
   };
 
@@ -309,11 +347,33 @@ export default function Checkout() {
                         }
                         className="input-field"
                       >
-                        <option value="SP">SP</option>
-                        <option value="RJ">RJ</option>
-                        <option value="MG">MG</option>
+                        <option value="AC">AC</option>
+                        <option value="AL">AL</option>
+                        <option value="AP">AP</option>
+                        <option value="AM">AM</option>
                         <option value="BA">BA</option>
+                        <option value="CE">CE</option>
+                        <option value="DF">DF</option>
+                        <option value="ES">ES</option>
+                        <option value="GO">GO</option>
+                        <option value="MA">MA</option>
+                        <option value="MT">MT</option>
+                        <option value="MS">MS</option>
+                        <option value="MG">MG</option>
+                        <option value="PA">PA</option>
+                        <option value="PB">PB</option>
+                        <option value="PR">PR</option>
+                        <option value="PE">PE</option>
+                        <option value="PI">PI</option>
+                        <option value="RJ">RJ</option>
+                        <option value="RN">RN</option>
+                        <option value="RS">RS</option>
+                        <option value="RO">RO</option>
+                        <option value="RR">RR</option>
                         <option value="SC">SC</option>
+                        <option value="SP">SP</option>
+                        <option value="SE">SE</option>
+                        <option value="TO">TO</option>
                       </select>
                     </div>
 
