@@ -1,11 +1,18 @@
 [build]
   publish = "dist/public"
+  functions = "netlify/functions"
+  command = "pnpm run build"
 
-[[redirects]]
-  from = "/api/frenet/*"
-  to = "https://api.frenet.com.br/api/:splat"
-  status = 200
-  force = true
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@netlify/functions"]
+
+[dev]
+  targetPort = 5173
+  port = 8888
+  autoLaunch = false
+
+
 
 [[redirects]]
   from = "/*"
