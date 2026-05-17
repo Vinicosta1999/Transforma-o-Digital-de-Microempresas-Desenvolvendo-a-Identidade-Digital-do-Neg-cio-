@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { PRODUTOS } from '@/lib/produtos';
 import ProdutoCard from '@/components/ProdutoCard';
 
-const HERO_IMAGE = '/manus-storage/hero-case-point_8e9dc62b.png';
+const HERO_IMAGE = '/assets/hero-case-point.png';
 
 export default function Home() {
   const produtosDestaque = PRODUTOS.slice(0, 8);
@@ -13,26 +13,36 @@ export default function Home() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section
-        className="relative h-96 md:h-[500px] bg-cover bg-center flex items-center justify-center"
+        className="relative h-[500px] md:h-[600px] bg-cover bg-center flex items-center justify-center overflow-hidden"
         style={{
           backgroundImage: `url('${HERO_IMAGE}')`,
           backgroundAttachment: 'fixed',
         }}
       >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <div className="relative z-10 text-center text-white px-4 max-w-2xl">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            Acessórios Premium para Eletrônicos
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
+        <div className="relative z-10 text-center text-white px-4 max-w-3xl animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <span className="inline-block px-4 py-1 bg-primary/20 backdrop-blur-md border border-primary/30 rounded-full text-primary-foreground text-sm font-bold mb-6 tracking-wider uppercase">
+            Qualidade Premium
+          </span>
+          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-tight drop-shadow-2xl">
+            Acessórios que <span className="text-primary">Potencializam</span> seu Estilo
           </h1>
-          <p className="text-lg md:text-xl mb-8 text-gray-100">
-            Cabos, carregadores e películas de proteção de alta qualidade para seus dispositivos
+          <p className="text-xl md:text-2xl mb-10 text-zinc-200 font-medium leading-relaxed drop-shadow-lg">
+            Cabos, carregadores e películas de proteção de alta performance para quem não aceita menos que o melhor.
           </p>
-          <Link href="/catalogo">
-            <div className="btn-primary inline-flex items-center gap-2 cursor-pointer">
-              Explorar Catálogo
-              <ArrowRight className="w-5 h-5" />
-            </div>
-          </Link>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+            <Link href="/catalogo">
+              <div className="btn-primary text-lg px-10 py-4 rounded-xl shadow-2xl shadow-primary/20 hover:scale-105 transition-all duration-300 flex items-center gap-3 cursor-pointer">
+                Explorar Catálogo
+                <ArrowRight className="w-6 h-6" />
+              </div>
+            </Link>
+            <Link href="/sobre">
+              <div className="px-10 py-4 rounded-xl border border-white/30 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 text-lg font-semibold cursor-pointer">
+                Nossa História
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 

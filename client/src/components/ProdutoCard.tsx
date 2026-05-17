@@ -18,11 +18,14 @@ export default function ProdutoCard({ produto, onDetalhes }: ProdutoCardProps) {
     setAdicionando(true);
     try {
       adicionarItem(produto, 1);
-      toast.success(`${produto.nome} adicionado ao carrinho!`);
+      toast.success(`${produto.nome} adicionado ao carrinho!`, {
+        description: "Você pode finalizar sua compra no ícone do carrinho.",
+        duration: 3000,
+      });
     } catch (erro) {
       toast.error('Erro ao adicionar ao carrinho');
     } finally {
-      setAdicionando(false);
+      setTimeout(() => setAdicionando(false), 500);
     }
   };
 
@@ -75,19 +78,21 @@ export default function ProdutoCard({ produto, onDetalhes }: ProdutoCardProps) {
       </div>
 
       {/* Informações */}
-      <div className="product-info">
-        <h3 className="font-bold text-lg mb-1 line-clamp-2 hover:text-primary transition cursor-pointer">
+      <div className="product-info p-4 bg-white dark:bg-zinc-900 rounded-b-xl shadow-sm">
+        <h3 className="font-bold text-lg mb-1 line-clamp-2 hover:text-primary transition cursor-pointer text-zinc-900 dark:text-zinc-100">
           {produto.nome}
         </h3>
-        <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+        <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-3 line-clamp-2 leading-relaxed">
           {produto.descricao}
         </p>
 
         {/* Preço */}
-        <div className="flex items-baseline gap-2 mb-3">
-          <span className="product-price">R$ {produto.preco.toFixed(2)}</span>
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-2xl font-black text-primary tracking-tight">
+            R$ {produto.preco.toFixed(2)}
+          </span>
           {desconto > 0 && (
-            <span className="text-sm text-muted-foreground line-through">
+            <span className="text-sm text-zinc-400 line-through decoration-destructive/50">
               R$ {(produto.preco / (1 - desconto / 100)).toFixed(2)}
             </span>
           )}
