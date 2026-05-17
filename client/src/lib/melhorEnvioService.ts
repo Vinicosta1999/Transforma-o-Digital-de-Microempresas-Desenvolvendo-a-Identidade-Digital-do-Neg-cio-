@@ -85,12 +85,13 @@ export async function calcularFrete(
     };
 
     // Chamada através do proxy configurado no netlify.toml
+    // A API da Frenet exige o header 'token' em vez de 'Authorization' em alguns endpoints
     const response = await fetch(`${API_URL}/Shipping`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${FRENET_TOKEN}`
+        'token': FRENET_TOKEN
       },
       body: JSON.stringify(frenetPayload)
     });
@@ -224,7 +225,7 @@ export async function rastrearEnvio(numero_rastreamento: string): Promise<any> {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Bearer ${FRENET_TOKEN}`
+        'token': FRENET_TOKEN
       }
     });
 

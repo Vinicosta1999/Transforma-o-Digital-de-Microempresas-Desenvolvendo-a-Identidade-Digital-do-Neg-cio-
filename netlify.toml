@@ -1,9 +1,12 @@
+[build]
+  command = "pnpm build"
+  publish = "dist"
+
 [[redirects]]
   from = "/api/frenet/*"
   to = "https://api.frenet.com.br/api/:splat"
   status = 200
   force = true
-  headers = {X-From = "Netlify"}
 
 [[redirects]]
   from = "/*"
