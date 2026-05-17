@@ -284,7 +284,10 @@ export default function Checkout() {
                     {/* Linha 1: Rua e Número */}
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       <div className="sm:col-span-3">
+                        <label htmlFor="rua" className="sr-only">Rua</label>
                         <input
+                          id="rua"
+                          name="rua"
                           type="text"
                           placeholder="Rua"
                           value={endereco.rua}
@@ -292,85 +295,115 @@ export default function Checkout() {
                           className="input-field bg-[#0f172a] border-slate-700"
                         />
                       </div>
-                      <input
-                        type="text"
-                        placeholder="Número"
-                        value={endereco.numero}
-                        onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
-                        className="input-field bg-[#0f172a] border-slate-700"
-                      />
+                      <div>
+                        <label htmlFor="numero" className="sr-only">Número</label>
+                        <input
+                          id="numero"
+                          name="numero"
+                          type="text"
+                          placeholder="Número"
+                          value={endereco.numero}
+                          onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
+                          className="input-field bg-[#0f172a] border-slate-700"
+                        />
+                      </div>
                     </div>
 
                     {/* Linha 2: Complemento */}
-                    <input
-                      type="text"
-                      placeholder="Complemento (opcional)"
-                      value={endereco.complemento}
-                      onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
-                      className="input-field bg-[#0f172a] border-slate-700"
-                    />
-
-                    {/* Linha 3: Bairro e Cidade */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="complemento" className="sr-only">Complemento (opcional)</label>
                       <input
+                        id="complemento"
+                        name="complemento"
                         type="text"
-                        placeholder="Bairro"
-                        value={endereco.bairro}
-                        onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
-                        className="input-field bg-[#0f172a] border-slate-700"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Cidade"
-                        value={endereco.cidade}
-                        onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })}
+                        placeholder="Complemento (opcional)"
+                        value={endereco.complemento}
+                        onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
                         className="input-field bg-[#0f172a] border-slate-700"
                       />
                     </div>
 
-                    {/* Linha 4: CEP e UF (Conforme modelo solicitado) */}
+                    {/* Linha 3: Bairro e Cidade */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <input
-                        type="text"
-                        placeholder="CEP"
-                        value={endereco.cep}
-                        onChange={(e) => handleCEPChange(e.target.value)}
-                        maxLength={9}
-                        className="input-field bg-[#0f172a] border-slate-700"
-                      />
-                      <select
-                        value={endereco.estado}
-                        onChange={(e) => setEndereco({ ...endereco, estado: e.target.value })}
-                        className="input-field bg-[#0f172a] border-slate-700"
-                      >
-                        <option value="AC">AC</option>
-                        <option value="AL">AL</option>
-                        <option value="AP">AP</option>
-                        <option value="AM">AM</option>
-                        <option value="BA">BA</option>
-                        <option value="CE">CE</option>
-                        <option value="DF">DF</option>
-                        <option value="ES">ES</option>
-                        <option value="GO">GO</option>
-                        <option value="MA">MA</option>
-                        <option value="MT">MT</option>
-                        <option value="MS">MS</option>
-                        <option value="MG">MG</option>
-                        <option value="PA">PA</option>
-                        <option value="PB">PB</option>
-                        <option value="PR">PR</option>
-                        <option value="PE">PE</option>
-                        <option value="PI">PI</option>
-                        <option value="RJ">RJ</option>
-                        <option value="RN">RN</option>
-                        <option value="RS">RS</option>
-                        <option value="RO">RO</option>
-                        <option value="RR">RR</option>
-                        <option value="SC">SC</option>
-                        <option value="SP">SP</option>
-                        <option value="SE">SE</option>
-                        <option value="TO">TO</option>
-                      </select>
+                      <div>
+                        <label htmlFor="bairro" className="sr-only">Bairro</label>
+                        <input
+                          id="bairro"
+                          name="bairro"
+                          type="text"
+                          placeholder="Bairro"
+                          value={endereco.bairro}
+                          onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
+                          className="input-field bg-[#0f172a] border-slate-700"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="cidade" className="sr-only">Cidade</label>
+                        <input
+                          id="cidade"
+                          name="cidade"
+                          type="text"
+                          placeholder="Cidade"
+                          value={endereco.cidade}
+                          onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })}
+                          className="input-field bg-[#0f172a] border-slate-700"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Linha 4: CEP e UF */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="cep" className="sr-only">CEP</label>
+                        <input
+                          id="cep"
+                          name="cep"
+                          type="text"
+                          placeholder="CEP"
+                          value={endereco.cep}
+                          onChange={(e) => handleCEPChange(e.target.value)}
+                          maxLength={9}
+                          className="input-field bg-[#0f172a] border-slate-700"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="estado" className="sr-only">Estado</label>
+                        <select
+                          id="estado"
+                          name="estado"
+                          value={endereco.estado}
+                          onChange={(e) => setEndereco({ ...endereco, estado: e.target.value })}
+                          className="input-field bg-[#0f172a] border-slate-700"
+                        >
+                          <option value="AC">AC</option>
+                          <option value="AL">AL</option>
+                          <option value="AP">AP</option>
+                          <option value="AM">AM</option>
+                          <option value="BA">BA</option>
+                          <option value="CE">CE</option>
+                          <option value="DF">DF</option>
+                          <option value="ES">ES</option>
+                          <option value="GO">GO</option>
+                          <option value="MA">MA</option>
+                          <option value="MT">MT</option>
+                          <option value="MS">MS</option>
+                          <option value="MG">MG</option>
+                          <option value="PA">PA</option>
+                          <option value="PB">PB</option>
+                          <option value="PR">PR</option>
+                          <option value="PE">PE</option>
+                          <option value="PI">PI</option>
+                          <option value="RJ">RJ</option>
+                          <option value="RN">RN</option>
+                          <option value="RS">RS</option>
+                          <option value="RO">RO</option>
+                          <option value="RR">RR</option>
+                          <option value="SC">SC</option>
+                          <option value="SP">SP</option>
+                          <option value="SE">SE</option>
+                          <option value="TO">TO</option>
+                        </select>
+                      </div>
                     </div>
 
                     {etapa === 'endereco' && (
@@ -449,7 +482,7 @@ export default function Checkout() {
                       }}>
                       <input
                         type="radio"
-                        name="pagamento"
+                        name="metodo_pagamento"
                         value="whatsapp"
                         checked={metodo_pagamento === 'whatsapp'}
                         onChange={() => setMetodo_pagamento('whatsapp')}
@@ -468,7 +501,7 @@ export default function Checkout() {
                       }}>
                       <input
                         type="radio"
-                        name="pagamento"
+                        name="metodo_pagamento"
                         value="cartao"
                         checked={metodo_pagamento === 'cartao'}
                         onChange={() => setMetodo_pagamento('cartao')}
@@ -482,35 +515,55 @@ export default function Checkout() {
 
                     {metodo_pagamento === 'cartao' && (
                       <div className="grid grid-cols-1 gap-4 mt-4 animate-in fade-in slide-in-from-top-4">
-                        <input
-                          type="text"
-                          placeholder="Nome no Cartão"
-                          value={pagamento.titular}
-                          onChange={(e) => setPagamento({ ...pagamento, titular: e.target.value })}
-                          className="input-field bg-[#0f172a] border-slate-700"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Número do Cartão"
-                          value={pagamento.numero}
-                          onChange={(e) => setPagamento({ ...pagamento, numero: e.target.value })}
-                          className="input-field bg-[#0f172a] border-slate-700"
-                        />
+                        <div>
+                          <label htmlFor="titular" className="sr-only">Nome no Cartão</label>
+                          <input
+                            id="titular"
+                            name="titular"
+                            type="text"
+                            placeholder="Nome no Cartão"
+                            value={pagamento.titular}
+                            onChange={(e) => setPagamento({ ...pagamento, titular: e.target.value })}
+                            className="input-field bg-[#0f172a] border-slate-700"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="cartao_numero" className="sr-only">Número do Cartão</label>
+                          <input
+                            id="cartao_numero"
+                            name="cartao_numero"
+                            type="text"
+                            placeholder="Número do Cartão"
+                            value={pagamento.numero}
+                            onChange={(e) => setPagamento({ ...pagamento, numero: e.target.value })}
+                            className="input-field bg-[#0f172a] border-slate-700"
+                          />
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
-                          <input
-                            type="text"
-                            placeholder="Validade (MM/AA)"
-                            value={pagamento.validade}
-                            onChange={(e) => setPagamento({ ...pagamento, validade: e.target.value })}
-                            className="input-field bg-[#0f172a] border-slate-700"
-                          />
-                          <input
-                            type="text"
-                            placeholder="CVV"
-                            value={pagamento.cvv}
-                            onChange={(e) => setPagamento({ ...pagamento, cvv: e.target.value })}
-                            className="input-field bg-[#0f172a] border-slate-700"
-                          />
+                          <div>
+                            <label htmlFor="validade" className="sr-only">Validade (MM/AA)</label>
+                            <input
+                              id="validade"
+                              name="validade"
+                              type="text"
+                              placeholder="Validade (MM/AA)"
+                              value={pagamento.validade}
+                              onChange={(e) => setPagamento({ ...pagamento, validade: e.target.value })}
+                              className="input-field bg-[#0f172a] border-slate-700"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="cvv" className="sr-only">CVV</label>
+                            <input
+                              id="cvv"
+                              name="cvv"
+                              type="text"
+                              placeholder="CVV"
+                              value={pagamento.cvv}
+                              onChange={(e) => setPagamento({ ...pagamento, cvv: e.target.value })}
+                              className="input-field bg-[#0f172a] border-slate-700"
+                            />
+                          </div>
                         </div>
                       </div>
                     )}
