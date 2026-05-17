@@ -2,13 +2,9 @@
   command = "pnpm build"
   functions = "netlify/functions"
 
-# 🟢 ADICIONE ESTE BLOCO ABAIXO:
+# 🟢 CONFIGURAÇÃO CORRIGIDA EM FORMATO DE OBJETO:
 [functions]
-  node_bundle = "esbuild"
   external_node_modules = ["@tailwindcss/oxide", "lightningcss", "@babel/core"]
 
-[[redirects]]
-  from = "/api/frenet/*"
-  to = "/.netlify/functions/calcular-frete"
-  status = 200
-  force = true
+[functions.calcular-frete]
+  node_bundle = true
