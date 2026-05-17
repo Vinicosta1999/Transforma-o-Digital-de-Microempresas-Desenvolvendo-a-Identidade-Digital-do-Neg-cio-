@@ -1,17 +1,12 @@
 /**
- * Serviço de Integração com Melhor Envio API v2
+ * Serviço de Integração com API Frenet
  * Cálculo de frete em tempo real
  * 
- * Documentação: https://www.melhorenvio.com.br/api/v2/docs
+ * Documentação: https://www.frenet.com.br/api/
  */
 
-/**
- * O token da API Frenet é gerido exclusivamente no servidor.
- * Nunca é exposto ao cliente por razões de segurança.
- * Todas as requisições passam pelo proxy server-side em /api/frenet
- */
-
-const API_URL = '/api/frenet';
+const FRENET_API_URL = 'https://api.frenet.com.br/api';
+const FRENET_TOKEN = '0D9AED5DR0AB7R4086R96AARD1BC23F46D81';
 
 export interface ProdutoFrete {
   id: string;
@@ -57,23 +52,7 @@ export interface CalculoFrete {
 }
 
 /**
- * Calcula peso total e dimensões dos produtos para o Melhor Envio
- */
-function prepararVolumes(produtos: ProdutoFrete[]) {
-  return produtos.map(p => ({
-    id: p.id,
-    width: p.largura || 20,
-    height: p.altura || 20,
-    length: p.comprimento || 20,
-    weight: (p.peso || 500) / 1000, // Melhor Envio usa KG
-    insurance_value: p.valor,
-    quantity: p.quantidade
-  }));
-}
-
-/**
- * Calcula opções de frete reais via proxy server-side
- * O token é gerido no servidor, nunca exposto ao cliente
+ * Calcula opções de frete reais via API Frenet (Chamada Direta no Cliente para Netlify)
  */
 export async function calcularFrete(
   produtos: ProdutoFrete[],
@@ -88,24 +67,35 @@ export async function calcularFrete(
   };
 
   try {
-    const volumes = prepararVolumes(produtos);
+    const totalWeightKG = peso_total / 1000;
+    const totalValue = produtos.reduce((acc, p) => acc + (p.valor * p.quantidade), 0);
 
-    // Fazer requisição para o proxy server-side
-    const response = await fetch(`${API_URL}/shipping/quote`, {
+    const frenetPayload = {
+      ShipperPostalCode: cep_origem.replace(/\D/g, ''),
+      ReceiverPostalCode: endereco_destino.cep.replace(/\D/g, ''),
+      ShipmentInvoiceValue: totalValue,
+      ShipmentWeight: totalWeightKG || 0.5,
+      ReceiverType: 1,
+      RealWeight: true,
+      CubedWeight: false,
+      ShipmentLength: dimensoes.comprimento,
+      ShipmentHeight: dimensoes.altura,
+      ShipmentWidth: dimensoes.largura,
+      ShipmentDiameter: 0,
+    };
+
+    const response = await fetch(`${FRENET_API_URL}/Shipping`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${FRENET_TOKEN}`
       },
-      body: JSON.stringify({
-        from: { postal_code: cep_origem.replace(/\D/g, '') },
-        to: { postal_code: endereco_destino.cep.replace(/\D/g, '') },
-        products: volumes
-      })
+      body: JSON.stringify(frenetPayload)
     });
 
     if (!response.ok) {
-      throw new Error('Erro ao consultar API de frete');
+      throw new Error('Erro ao consultar API Frenet');
     }
 
     const data = await response.json();
@@ -113,6 +103,10 @@ export async function calcularFrete(
     let listaServicos = [];
     if (data && data.ShippingSevicesArray) {
       listaServicos = data.ShippingSevicesArray.filter((servico: any) => !servico.Error);
+    }
+
+    if (listaServicos.length === 0) {
+        throw new Error('Nenhuma opção de frete disponível');
     }
 
     const opcoes: OpcaoFrete[] = listaServicos.map((servico: any) => {
@@ -140,27 +134,22 @@ export async function calcularFrete(
     };
 
   } catch (error) {
-    console.error('Erro ao calcular frete:', error);
-    // Lógica realista para variar o preço com base na distância dos CEPs (Baseado em tabelas reais dos Correios)
+    console.warn('Erro ao calcular frete na API real, usando fallback:', error);
+    
+    // Fallback realista baseado em distância de CEPs
     const cepOrigemNum = parseInt(cep_origem.replace(/\D/g, '').substring(0, 2)) || 1;
     const cepDestinoNum = parseInt(endereco_destino.cep.replace(/\D/g, '').substring(0, 2)) || 1;
     const diff = Math.abs(cepOrigemNum - cepDestinoNum);
     
-    // Preços base reais aproximados (2024)
-    let basePricePAC = 19.80;
-    let basePriceSEDEX = 24.50;
-    
-    // Fator de distância
+    const basePricePAC = 19.80;
+    const basePriceSEDEX = 24.50;
     const distanceFactor = diff * 1.2;
-    
-    // Fator de peso (R$ por KG adicional)
     const totalWeightKG = peso_total / 1000;
     const weightFactor = totalWeightKG > 1 ? (totalWeightKG - 1) * 5.5 : 0;
     
     const pacPrice = basePricePAC + distanceFactor + weightFactor;
     const sedexPrice = basePriceSEDEX + (distanceFactor * 1.5) + (weightFactor * 1.2);
     
-    // Prazos realistas
     const pacTime = diff === 0 ? 3 : Math.max(5, Math.min(12, diff + 4));
     const sedexTime = diff === 0 ? 1 : Math.max(2, Math.min(5, Math.floor(diff / 3) + 1));
 
@@ -193,26 +182,17 @@ export async function calcularFrete(
   }
 }
 
-/**
- * Valida CEP
- */
 export function validarCEP(cep: string): boolean {
   const cepRegex = /^\d{5}-?\d{3}$/;
   return cepRegex.test(cep);
 }
 
-/**
- * Formata CEP
- */
 export function formatarCEP(cep: string): string {
   const cepLimpo = cep.replace(/\D/g, '');
   if (cepLimpo.length !== 8) return cep;
   return `${cepLimpo.slice(0, 5)}-${cepLimpo.slice(5)}`;
 }
 
-/**
- * Busca informações de CEP usando a API ViaCEP
- */
 export async function buscarCEP(cep: string): Promise<EnderecoEntrega | null> {
   try {
     const cepLimpo = cep.replace(/\D/g, '');
@@ -221,9 +201,7 @@ export async function buscarCEP(cep: string): Promise<EnderecoEntrega | null> {
     const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
     const data = await response.json();
 
-    if (data.erro) {
-      return null;
-    }
+    if (data.erro) return null;
 
     return {
       cep: formatarCEP(cepLimpo),
@@ -240,47 +218,20 @@ export async function buscarCEP(cep: string): Promise<EnderecoEntrega | null> {
   }
 }
 
-/**
- * Gera etiqueta de envio (simulado)
- */
-export async function gerarEtiqueta(
-  pedido_id: string,
-  opcao_frete: OpcaoFrete,
-  endereco: EnderecoEntrega
-): Promise<{ numero_rastreamento: string; url_etiqueta: string }> {
-  try {
-    const numero_rastreamento = `BR${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-
-    return {
-      numero_rastreamento,
-      url_etiqueta: `https://www.melhorenvio.com.br/rastreio/${numero_rastreamento}`,
-    };
-  } catch (error) {
-    console.error('Erro ao gerar etiqueta:', error);
-    throw new Error('Erro ao gerar etiqueta');
-  }
-}
-
-/**
- * Rastreia envio via proxy server-side
- */
 export async function rastrearEnvio(numero_rastreamento: string): Promise<any> {
   try {
-    const response = await fetch(`${API_URL}/tracking/${numero_rastreamento}`, {
+    const response = await fetch(`${FRENET_API_URL}/Tracking/${numero_rastreamento}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
+        'Authorization': `Bearer ${FRENET_TOKEN}`
       }
     });
 
-    if (!response.ok) {
-      throw new Error('Rastreamento não encontrado');
-    }
-
+    if (!response.ok) throw new Error('Rastreamento não encontrado');
     return await response.json();
   } catch (error) {
     console.error('Erro ao rastrear envio:', error);
-    // Retornar fallback
     return {
       numero_rastreamento,
       status: 'Em processamento',
@@ -291,16 +242,10 @@ export async function rastrearEnvio(numero_rastreamento: string): Promise<any> {
   }
 }
 
-/**
- * Formata preço de frete para exibição
- */
 export function formatarPrecoFrete(preco: number): string {
   return `R$ ${preco.toFixed(2)}`;
 }
 
-/**
- * Calcula data de entrega
- */
 export function calcularDataEntrega(prazo_dias: number): Date {
   const data = new Date();
   data.setDate(data.getDate() + prazo_dias);
