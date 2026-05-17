@@ -1,16 +1,14 @@
 [build]
   command = "pnpm build"
-  functions = "dist"
-  publish = "dist/public"
+  functions = "netlify/functions"
 
+# 🟢 ADICIONE ESTE BLOCO ABAIXO:
 [functions]
-  node_bundler = "esbuild"
-  external_node_modules = ["express"]
+  node_bundle = "esbuild"
+  external_node_modules = ["@tailwindcss/oxide", "lightningcss", "@babel/core"]
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/api/frenet/*"
+  to = "/.netlify/functions/calcular-frete"
   status = 200
-
-[context.production]
-  command = "pnpm build"
+  force = true
