@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { Produto } from '@/types';
 import { useCarrinho } from '@/contexts/CarrinhoContext';
 import { toast } from 'sonner';
@@ -11,16 +11,15 @@ interface ProdutoCardProps {
 
 export default function ProdutoCard({ produto, onDetalhes }: ProdutoCardProps) {
   const { adicionarItem } = useCarrinho();
-  const [favorito, setFavorito] = useState(false);
   const [adicionando, setAdicionando] = useState(false);
 
-  const handleAdicionarAoCarrinho = async () => {
+  const handleAdicionarAoCarrinho = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     setAdicionando(true);
     try {
       adicionarItem(produto, 1);
       toast.success(`${produto.nome} adicionado ao carrinho!`, {
-        description: "Você pode finalizar sua compra no ícone do carrinho.",
-        duration: 3000,
+        duration: 2000,
       });
     } catch (erro) {
       toast.error('Erro ao adicionar ao carrinho');
@@ -29,92 +28,75 @@ export default function ProdutoCard({ produto, onDetalhes }: ProdutoCardProps) {
     }
   };
 
-  const handleToggleFavorito = () => {
-    setFavorito(!favorito);
-    toast.success(favorito ? 'Removido dos favoritos' : 'Adicionado aos favoritos');
-  };
-
-  const desconto = Math.floor(Math.random() * 30); // Simulação de desconto
+  const percentualDesconto = produto.preco_original 
+    ? Math.round(((produto.preco_original - produto.preco) / produto.preco_original) * 100)
+    : 0;
 
   return (
-    <div className="product-card group">
-      {/* Imagem */}
-      <div className="product-image relative overflow-hidden">
+    <div 
+      className="group bg-[#1e293b] rounded-xl overflow-hidden border border-slate-800 hover:border-indigo-500/50 transition-all duration-300 shadow-lg cursor-pointer flex flex-col h-full"
+      onClick={() => onDetalhes?.(produto)}
+    >
+      {/* Imagem com Botão Adicionar */}
+      <div className="relative aspect-square bg-white p-4 overflow-hidden flex-shrink-0">
         <img
           src={produto.imagem}
           alt={produto.nome}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
         />
 
         {/* Badge de Desconto */}
-        {desconto > 0 && (
-          <div className="absolute top-3 left-3 badge badge-sale">
-            -{desconto}%
+        {percentualDesconto > 0 && (
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-emerald-500 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg shadow-lg z-10">
+            {percentualDesconto}% OFF
           </div>
         )}
 
-        {/* Botão Favorito */}
-        <button
-          onClick={handleToggleFavorito}
-          className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-lg hover:bg-accent transition"
-          title={favorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-        >
-          <Heart
-            className={`w-5 h-5 ${favorito ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`}
-          />
-        </button>
-
-        {/* Overlay com botão */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
+        {/* Botão Adicionar - Visível no hover em desktop, sempre visível ou acessível em mobile */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/5 sm:bg-black/0 sm:group-hover:bg-black/10 transition-all duration-300">
           <button
             onClick={handleAdicionarAoCarrinho}
             disabled={adicionando || produto.estoque === 0}
-            className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-bold flex items-center gap-2 shadow-2xl transform sm:translate-y-4 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition-all duration-300 text-sm sm:text-base"
           >
-            <ShoppingCart className="w-5 h-5" />
-            {adicionando ? 'Adicionando...' : 'Adicionar'}
+            <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="whitespace-nowrap">{adicionando ? '...' : 'Adicionar'}</span>
           </button>
         </div>
       </div>
 
       {/* Informações */}
-      <div className="product-info p-4 bg-white dark:bg-zinc-900 rounded-b-xl shadow-sm">
-        <h3 className="font-bold text-lg mb-1 line-clamp-2 hover:text-primary transition cursor-pointer text-zinc-900 dark:text-zinc-100">
-          {produto.nome}
-        </h3>
-        <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-3 line-clamp-2 leading-relaxed">
-          {produto.descricao}
-        </p>
-
-        {/* Preço */}
-        <div className="flex items-center gap-3 mb-3">
-          <span className="text-2xl font-black text-primary tracking-tight">
-            R$ {produto.preco.toFixed(2)}
-          </span>
-          {desconto > 0 && (
-            <span className="text-sm text-zinc-400 line-through decoration-destructive/50">
-              R$ {(produto.preco / (1 - desconto / 100)).toFixed(2)}
-            </span>
-          )}
+      <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between">
+        <div className="space-y-1 sm:space-y-2">
+          <h3 className="font-bold text-slate-100 text-sm sm:text-base line-clamp-1 group-hover:text-indigo-400 transition-colors">
+            {produto.nome}
+          </h3>
+          <p className="text-slate-400 text-[10px] sm:text-xs line-clamp-2 h-7 sm:h-8 leading-relaxed">
+            {produto.descricao}
+          </p>
         </div>
 
-        {/* Status de Estoque */}
-        <div className="flex items-center justify-between">
-          <span
-            className={`text-xs font-semibold ${
-              produto.estoque > 0 ? 'text-green-400' : 'text-destructive'
-            }`}
-          >
-            {produto.estoque > 0 ? `${produto.estoque} em estoque` : 'Fora de estoque'}
-          </span>
-          {onDetalhes && (
-            <button
-              onClick={() => onDetalhes(produto)}
-              className="text-primary text-xs font-semibold hover:underline"
-            >
-              Detalhes
-            </button>
-          )}
+        <div className="pt-2">
+          {/* Preço */}
+          <div className="flex items-baseline flex-wrap gap-1 sm:gap-2">
+            <span className="text-lg sm:text-xl font-bold text-amber-500">
+              R$ {produto.preco.toFixed(2)}
+            </span>
+            {produto.preco_original && (
+              <span className="text-[10px] sm:text-xs text-slate-500 line-through">
+                R$ {produto.preco_original.toFixed(2)}
+              </span>
+            )}
+          </div>
+
+          {/* Estoque */}
+          <div className="pt-1">
+            <span className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider ${
+              produto.estoque > 0 ? 'text-emerald-500' : 'text-rose-500'
+            }`}>
+              {produto.estoque > 0 ? 'Em Estoque' : 'Esgotado'}
+            </span>
+          </div>
         </div>
       </div>
     </div>

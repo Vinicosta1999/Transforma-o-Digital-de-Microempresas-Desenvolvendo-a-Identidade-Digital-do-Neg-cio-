@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Carrinho, ItemCarrinho, Produto } from '@/types';
 import { supabaseClient } from '@/lib/supabaseClient';
-import { obterCupomAplicado } from '@/lib/cupomService';
+import { PRODUTOS } from '@/lib/produtos';
 
 interface CarrinhoContextType {
   carrinho: Carrinho;
@@ -9,7 +9,6 @@ interface CarrinhoContextType {
   removerItem: (produto_id: string) => void;
   atualizarQuantidade: (produto_id: string, quantidade: number) => void;
   limparCarrinho: () => void;
-  aplicarDesconto: (desconto: number, cupom_codigo?: string) => void;
   totalItens: number;
 }
 
@@ -33,22 +32,37 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const calcularTotais = (itens: ItemCarrinho[]) => {
+    let subtotal = 0;
+    let desconto = 0;
+
+    itens.forEach(item => {
+      const produto = PRODUTOS.find(p => p.id === item.produto_id);
+      if (produto) {
+        const precoCheio = produto.preco_original || produto.preco;
+        subtotal += precoCheio * item.quantidade;
+        desconto += (precoCheio - produto.preco) * item.quantidade;
+      }
+    });
+
+    return {
+      subtotal,
+      desconto,
+      total: subtotal - desconto
+    };
+  };
+
   // Carregar carrinho do localStorage e Supabase
   useEffect(() => {
     const carrinhoSalvo = localStorage.getItem('carrinho_case_point');
-    const cupomAplicado = obterCupomAplicado();
     
     if (carrinhoSalvo) {
       const parsed = JSON.parse(carrinhoSalvo);
-      const subtotal = parsed.itens.reduce((acc: number, item: any) => acc + item.preco_unitario * item.quantidade, 0);
-      const desconto = cupomAplicado ? cupomAplicado.desconto_valor : 0;
+      const totais = calcularTotais(parsed.itens);
       
       setCarrinho({
         ...parsed,
-        subtotal,
-        desconto,
-        total: subtotal - desconto,
-        cupom_codigo: cupomAplicado?.codigo
+        ...totais
       });
     }
 
@@ -56,15 +70,11 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
     if (usuarioId && supabaseClient && typeof supabaseClient.getCarrinho === 'function') {
       supabaseClient.getCarrinho(usuarioId).then((carrinhoSupabase) => {
         if (carrinhoSupabase) {
-          const subtotal = carrinhoSupabase.itens.reduce((acc: number, item: any) => acc + item.preco_unitario * item.quantidade, 0);
-          const desconto = cupomAplicado ? cupomAplicado.desconto_valor : 0;
+          const totais = calcularTotais(carrinhoSupabase.itens);
           
           setCarrinho({
             itens: carrinhoSupabase.itens,
-            subtotal,
-            desconto,
-            total: subtotal - desconto,
-            cupom_codigo: cupomAplicado?.codigo
+            ...totais
           });
         }
       }).catch((error) => {
@@ -112,19 +122,16 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
         ];
       }
 
-      const subtotal = novoItens.reduce((acc, item) => acc + item.preco_unitario * item.quantidade, 0);
-      const total = subtotal - prev.desconto;
-
-      return { ...prev, itens: novoItens, subtotal, total };
+      const totais = calcularTotais(novoItens);
+      return { ...prev, itens: novoItens, ...totais };
     });
   };
 
   const removerItem = (produto_id: string) => {
     setCarrinho((prev) => {
       const novoItens = prev.itens.filter((item) => item.produto_id !== produto_id);
-      const subtotal = novoItens.reduce((acc, item) => acc + item.preco_unitario * item.quantidade, 0);
-      const total = subtotal - prev.desconto;
-      return { ...prev, itens: novoItens, subtotal, total };
+      const totais = calcularTotais(novoItens);
+      return { ...prev, itens: novoItens, ...totais };
     });
   };
 
@@ -138,19 +145,9 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
       const novoItens = prev.itens.map((item) =>
         item.produto_id === produto_id ? { ...item, quantidade } : item
       );
-      const subtotal = novoItens.reduce((acc, item) => acc + item.preco_unitario * item.quantidade, 0);
-      const total = subtotal - prev.desconto;
-      return { ...prev, itens: novoItens, subtotal, total };
+      const totais = calcularTotais(novoItens);
+      return { ...prev, itens: novoItens, ...totais };
     });
-  };
-
-  const aplicarDesconto = (desconto: number, cupom_codigo?: string) => {
-    setCarrinho((prev) => ({
-      ...prev,
-      desconto,
-      cupom_codigo,
-      total: prev.subtotal - desconto
-    }));
   };
 
   const limparCarrinho = () => {
@@ -173,7 +170,6 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
         removerItem,
         atualizarQuantidade,
         limparCarrinho,
-        aplicarDesconto,
         totalItens,
       }}
     >

@@ -8,6 +8,7 @@ export interface Produto {
   nome: string;
   descricao: string;
   preco: number;
+  preco_original?: number;
   imagem: string;
   categoria: 'cabos' | 'carregadores' | 'peliculas' | 'outros';
   estoque: number;
