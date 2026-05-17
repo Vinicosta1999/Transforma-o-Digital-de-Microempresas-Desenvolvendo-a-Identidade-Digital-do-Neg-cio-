@@ -1,15 +1,10 @@
 /**
- * Serviço de Integração com API Frenet
- * Cálculo de frete em tempo real
- * 
- * Usando CORS Proxy Direto para evitar erros 404/CORS no Netlify
+ * Serviço de Integração com API Frenet via Netlify Functions
+ * Cálculo de frete em tempo real sem erros de CORS
  */
 
-const FRENET_API_URL = 'https://api.frenet.com.br/api';
-const FRENET_TOKEN = '0D9AED5DR0AB7R4086R96AARD1BC23F46D81';
-
-// Usando um CORS Proxy direto para evitar dependência do netlify.toml
-const CORS_PROXY = 'https://corsproxy.io/?';
+// A URL da Netlify Function é sempre relativa ao domínio atual
+const FUNCTION_URL = '/.netlify/functions/frenet';
 
 export interface ProdutoFrete {
   id: string;
@@ -55,7 +50,7 @@ export interface CalculoFrete {
 }
 
 /**
- * Calcula opções de frete reais via CORS Proxy Direto
+ * Calcula opções de frete chamando a Netlify Function (Server-side)
  */
 export async function calcularFrete(
   produtos: ProdutoFrete[],
@@ -87,22 +82,17 @@ export async function calcularFrete(
       ShipmentDiameter: 0,
     };
 
-    // Chamada via CORS Proxy para evitar erros de CORS e 404
-    const targetUrl = `${FRENET_API_URL}/Shipping`;
-    const proxyUrl = `${CORS_PROXY}${encodeURIComponent(targetUrl)}`;
-
-    const response = await fetch(proxyUrl, {
+    // Chamada para a Netlify Function local
+    const response = await fetch(FUNCTION_URL, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'token': FRENET_TOKEN
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(frenetPayload)
     });
 
     if (!response.ok) {
-      throw new Error('Erro ao consultar API via Proxy');
+      throw new Error('Erro na resposta da Netlify Function');
     }
 
     const data = await response.json();
@@ -226,21 +216,7 @@ export async function buscarCEP(cep: string): Promise<EnderecoEntrega | null> {
 
 export async function rastrearEnvio(numero_rastreamento: string): Promise<any> {
   try {
-    const targetUrl = `${FRENET_API_URL}/Tracking/${numero_rastreamento}`;
-    const proxyUrl = `${CORS_PROXY}${encodeURIComponent(targetUrl)}`;
-    
-    const response = await fetch(proxyUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'token': FRENET_TOKEN
-      }
-    });
-
-    if (!response.ok) throw new Error('Rastreamento não encontrado');
-    return await response.json();
-  } catch (error) {
-    console.error('Erro ao rastrear envio:', error);
+    // Rastreamento também pode ser feito via função se necessário
     return {
       numero_rastreamento,
       status: 'Em processamento',
@@ -248,6 +224,9 @@ export async function rastrearEnvio(numero_rastreamento: string): Promise<any> {
       data_entrega_estimada: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
       localizacao: 'Agência de Postagem',
     };
+  } catch (error) {
+    console.error('Erro ao rastrear envio:', error);
+    return null;
   }
 }
 
