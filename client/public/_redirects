@@ -1,2 +1,2 @@
-/frenet-api/*  https://api.frenet.com.br/api/:splat  200!
+/api/frenet/*  https://api.frenet.com.br/api/:splat  200!
 /*  /index.html  200

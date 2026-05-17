@@ -2,7 +2,7 @@
   publish = "dist/public"
 
 [[redirects]]
-  from = "/frenet-api/*"
+  from = "/api/frenet/*"
   to = "https://api.frenet.com.br/api/:splat"
   status = 200
   force = true

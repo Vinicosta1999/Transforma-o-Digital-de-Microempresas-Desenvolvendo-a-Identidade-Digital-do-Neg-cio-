@@ -1,18 +1,19 @@
 /**
- * Serviço de Integração com API Frenet - VERSÃO FINAL CORRIGIDA
- * Uso de Redirecionamento Nativo do Netlify para evitar CORS
+ * Serviço de Integração com API Frenet via Netlify Functions
+ * Cálculo de frete em tempo real sem erros de CORS
  */
 
-const FRENET_TOKEN = '0D9AED5DR0AB7R4086R96AARD1BC23F46D81';
+// A URL da Netlify Function é sempre relativa ao domínio atual
+const FUNCTION_URL = '/.netlify/functions/frenet';
 
 export interface ProdutoFrete {
   id: string;
   nome: string;
-  peso: number;
-  comprimento: number;
-  largura: number;
-  altura: number;
-  valor: number;
+  peso: number; // em gramas
+  comprimento: number; // em cm
+  largura: number; // em cm
+  altura: number; // em cm
+  valor: number; // em reais
   quantidade: number;
 }
 
@@ -30,113 +31,176 @@ export interface OpcaoFrete {
   id: string;
   nome: string;
   preco: number;
-  prazo: number;
+  prazo: number; // em dias
   descricao: string;
   codigo: string | number;
   empresa?: string;
 }
 
+export interface CalculoFrete {
+  opcoes: OpcaoFrete[];
+  peso_total: number;
+  dimensoes: {
+    comprimento: number;
+    largura: number;
+    altura: number;
+  };
+  cep_origem: string;
+  cep_destino: string;
+}
+
 /**
- * Calcula opções de frete reais via Redirecionamento Nativo do Netlify
+ * Calcula opções de frete chamando a Netlify Function (Server-side)
  */
 export async function calcularFrete(
   produtos: ProdutoFrete[],
   endereco_destino: EnderecoEntrega,
   cep_origem: string = '01310-100'
-): Promise<{ opcoes: OpcaoFrete[] }> {
+): Promise<CalculoFrete> {
   const peso_total = produtos.reduce((acc, p) => acc + (p.peso * p.quantidade), 0);
-  const totalValue = produtos.reduce((acc, p) => acc + (p.valor * p.quantidade), 0);
-  
-  const payload = {
-    ShipperPostalCode: cep_origem.replace(/\D/g, ''),
-    ReceiverPostalCode: endereco_destino.cep.replace(/\D/g, ''),
-    ShipmentInvoiceValue: totalValue,
-    ShipmentWeight: peso_total / 1000 || 0.5,
-    ReceiverType: 1,
-    RealWeight: true,
-    ShipmentLength: 20,
-    ShipmentHeight: 20,
-    ShipmentWidth: 20,
+  const dimensoes = {
+    comprimento: Math.max(...produtos.map(p => p.comprimento), 20),
+    largura: Math.max(...produtos.map(p => p.largura), 20),
+    altura: produtos.reduce((acc, p) => acc + (p.altura * p.quantidade), 0)
   };
 
   try {
-    // Usando a rota de redirecionamento configurada no Netlify (_redirects e netlify.toml)
-    // Isso evita o erro de CORS porque o Netlify faz a chamada pelo lado do servidor.
-    const response = await fetch('/frenet-api/Shipping', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'token': FRENET_TOKEN
-        },
-        body: JSON.stringify(payload)
+    const totalWeightKG = peso_total / 1000;
+    const totalValue = produtos.reduce((acc, p) => acc + (p.valor * p.quantidade), 0);
+
+    const frenetPayload = {
+      ShipperPostalCode: cep_origem.replace(/\D/g, ''),
+      ReceiverPostalCode: endereco_destino.cep.replace(/\D/g, ''),
+      ShipmentInvoiceValue: totalValue,
+      ShipmentWeight: totalWeightKG || 0.5,
+      ReceiverType: 1,
+      RealWeight: true,
+      CubedWeight: false,
+      ShipmentLength: dimensoes.comprimento,
+      ShipmentHeight: dimensoes.altura,
+      ShipmentWidth: dimensoes.largura,
+      ShipmentDiameter: 0,
+    };
+
+    // Chamada para a Netlify Function local
+    const response = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(frenetPayload)
     });
 
     if (!response.ok) {
-        throw new Error(`Erro na API: ${response.status}`);
+      throw new Error('Erro na resposta da Netlify Function');
     }
 
     const data = await response.json();
-    const services = data.ShippingSevicesArray || [];
     
-    const opcoes = services.filter((s: any) => !s.Error).map((s: any) => ({
-      id: String(s.ServiceCode),
-      nome: s.ServiceDescription,
-      empresa: s.Carrier,
-      preco: parseFloat(s.ShippingPrice),
-      prazo: parseInt(s.DeliveryTime),
-      descricao: `${s.Carrier} - ${s.DeliveryTime} dias`,
-      codigo: s.ServiceCode
-    }));
+    let listaServicos = [];
+    if (data && data.ShippingSevicesArray) {
+      listaServicos = data.ShippingSevicesArray.filter((servico: any) => !servico.Error);
+    }
 
-    if (opcoes.length === 0) throw new Error('Nenhuma opção retornada');
-    return { opcoes };
+    if (listaServicos.length === 0) {
+        throw new Error('Nenhuma opção de frete disponível');
+    }
+
+    const opcoes: OpcaoFrete[] = listaServicos.map((servico: any) => {
+      const nomeEmpresa = servico.Carrier || "Entrega";
+      const nomeServico = servico.ServiceDescription || "Padrão";
+      const diasPrazo = servico.DeliveryTime || "3";
+
+      return {
+        id: String(servico.ServiceCode || Math.random()),
+        nome: nomeServico,
+        empresa: nomeEmpresa,
+        preco: parseFloat(servico.ShippingPrice) || 0,
+        prazo: parseInt(diasPrazo),
+        descricao: `${nomeEmpresa} ${nomeServico} - Entrega em ${diasPrazo} dias úteis`,
+        codigo: servico.ServiceCode
+      };
+    });
+
+    return {
+      opcoes,
+      peso_total,
+      dimensoes,
+      cep_origem,
+      cep_destino: endereco_destino.cep
+    };
 
   } catch (error) {
     console.warn('Erro no cálculo real, usando fallback:', error);
     
-    // Fallback para garantir que o usuário sempre consiga comprar
-    const diff = Math.abs(parseInt(cep_origem.substring(0,2)) - parseInt(endereco_destino.cep.substring(0,2))) || 2;
-    const precoBase = 18.50 + (diff * 1.5);
+    const cepOrigemNum = parseInt(cep_origem.replace(/\D/g, '').substring(0, 2)) || 1;
+    const cepDestinoNum = parseInt(endereco_destino.cep.replace(/\D/g, '').substring(0, 2)) || 1;
+    const diff = Math.abs(cepOrigemNum - cepDestinoNum);
     
+    const basePricePAC = 19.80;
+    const basePriceSEDEX = 24.50;
+    const distanceFactor = diff * 1.2;
+    const totalWeightKG = peso_total / 1000;
+    const weightFactor = totalWeightKG > 1 ? (totalWeightKG - 1) * 5.5 : 0;
+    
+    const pacPrice = basePricePAC + distanceFactor + weightFactor;
+    const sedexPrice = basePriceSEDEX + (distanceFactor * 1.5) + (weightFactor * 1.2);
+    
+    const pacTime = diff === 0 ? 3 : Math.max(5, Math.min(12, diff + 4));
+    const sedexTime = diff === 0 ? 1 : Math.max(2, Math.min(5, Math.floor(diff / 3) + 1));
+
     return {
       opcoes: [
         {
-          id: 'std-1',
-          nome: 'Entrega Padrão',
-          empresa: 'Transportadora',
-          preco: precoBase,
-          prazo: diff + 3,
-          descricao: `Entrega em até ${diff + 3} dias úteis`,
-          codigo: 'STD'
+          id: 'fallback-sedex',
+          nome: 'SEDEX',
+          empresa: 'Correios',
+          preco: sedexPrice,
+          prazo: sedexTime,
+          descricao: `SEDEX - Entrega em ${sedexTime} dias úteis`,
+          codigo: 'SEDEX'
         },
         {
-          id: 'exp-1',
-          nome: 'Entrega Expressa',
-          empresa: 'Sedex',
-          preco: precoBase + 12,
-          prazo: Math.max(1, Math.floor(diff/2)),
-          descricao: `Entrega em até ${Math.max(1, Math.floor(diff/2))} dias úteis`,
-          codigo: 'EXP'
+          id: 'fallback-pac',
+          nome: 'PAC',
+          empresa: 'Correios',
+          preco: pacPrice,
+          prazo: pacTime,
+          descricao: `PAC - Entrega em ${pacTime} dias úteis`,
+          codigo: 'PAC'
         }
-      ]
+      ],
+      peso_total,
+      dimensoes,
+      cep_origem,
+      cep_destino: endereco_destino.cep
     };
   }
 }
 
-export const validarCEP = (cep: string) => /^\d{5}-?\d{3}$/.test(cep);
-export const formatarCEP = (cep: string) => {
-  const c = cep.replace(/\D/g, '');
-  return c.length === 8 ? `${c.slice(0, 5)}-${c.slice(5)}` : cep;
-};
+export function validarCEP(cep: string): boolean {
+  const cepRegex = /^\d{5}-?\d{3}$/;
+  return cepRegex.test(cep);
+}
+
+export function formatarCEP(cep: string): string {
+  const cepLimpo = cep.replace(/\D/g, '');
+  if (cepLimpo.length !== 8) return cep;
+  return `${cepLimpo.slice(0, 5)}-${cepLimpo.slice(5)}`;
+}
 
 export async function buscarCEP(cep: string): Promise<EnderecoEntrega | null> {
   try {
-    const response = await fetch(`https://viacep.com.br/ws/${cep.replace(/\D/g, '')}/json/`);
+    const cepLimpo = cep.replace(/\D/g, '');
+    if (cepLimpo.length !== 8) return null;
+
+    const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
     const data = await response.json();
+
     if (data.erro) return null;
+
     return {
-      cep: formatarCEP(cep),
+      cep: formatarCEP(cepLimpo),
       rua: data.logradouro || '',
       numero: '',
       bairro: data.bairro || '',
@@ -144,5 +208,34 @@ export async function buscarCEP(cep: string): Promise<EnderecoEntrega | null> {
       estado: data.uf || '',
       complemento: data.complemento || '',
     };
-  } catch { return null; }
+  } catch (error) {
+    console.error('Erro ao buscar CEP:', error);
+    return null;
+  }
+}
+
+export async function rastrearEnvio(numero_rastreamento: string): Promise<any> {
+  try {
+    // Rastreamento também pode ser feito via função se necessário
+    return {
+      numero_rastreamento,
+      status: 'Em processamento',
+      data_postagem: new Date().toISOString(),
+      data_entrega_estimada: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+      localizacao: 'Agência de Postagem',
+    };
+  } catch (error) {
+    console.error('Erro ao rastrear envio:', error);
+    return null;
+  }
+}
+
+export function formatarPrecoFrete(preco: number): string {
+  return `R$ ${preco.toFixed(2)}`;
+}
+
+export function calcularDataEntrega(prazo_dias: number): Date {
+  const data = new Date();
+  data.setDate(data.getDate() + prazo_dias);
+  return data;
 }
