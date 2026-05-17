@@ -281,18 +281,7 @@ export default function Checkout() {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <input
-                        type="text"
-                        placeholder="CEP"
-                        value={endereco.cep}
-                        onChange={(e) => handleCEPChange(e.target.value)}
-                        maxLength={9}
-                        className="input-field bg-[#0f172a] border-slate-700"
-                      />
-                      <div className="hidden sm:block"></div>
-                    </div>
-
+                    {/* Linha 1: Rua e Número */}
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       <div className="sm:col-span-3">
                         <input
@@ -305,13 +294,14 @@ export default function Checkout() {
                       </div>
                       <input
                         type="text"
-                        placeholder="Nº"
+                        placeholder="Número"
                         value={endereco.numero}
                         onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
                         className="input-field bg-[#0f172a] border-slate-700"
                       />
                     </div>
 
+                    {/* Linha 2: Complemento */}
                     <input
                       type="text"
                       placeholder="Complemento (opcional)"
@@ -320,7 +310,8 @@ export default function Checkout() {
                       className="input-field bg-[#0f172a] border-slate-700"
                     />
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {/* Linha 3: Bairro e Cidade */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <input
                         type="text"
                         placeholder="Bairro"
@@ -333,6 +324,18 @@ export default function Checkout() {
                         placeholder="Cidade"
                         value={endereco.cidade}
                         onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })}
+                        className="input-field bg-[#0f172a] border-slate-700"
+                      />
+                    </div>
+
+                    {/* Linha 4: CEP e UF (Conforme modelo solicitado) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        placeholder="CEP"
+                        value={endereco.cep}
+                        onChange={(e) => handleCEPChange(e.target.value)}
+                        maxLength={9}
                         className="input-field bg-[#0f172a] border-slate-700"
                       />
                       <select
