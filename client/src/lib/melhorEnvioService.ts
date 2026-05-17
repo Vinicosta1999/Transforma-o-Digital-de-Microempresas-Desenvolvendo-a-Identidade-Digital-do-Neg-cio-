@@ -141,25 +141,38 @@ export async function calcularFrete(
 
   } catch (error) {
     console.error('Erro ao calcular frete:', error);
-    // Retornar fallback com opções padrão
+    // Retornar cálculo dinâmico simulado baseado no CEP como fallback
+    const cepOrigemNum = parseInt(cep_origem.replace(/\D/g, '').substring(0, 2)) || 1;
+    const cepDestinoNum = parseInt(endereco_destino.cep.replace(/\D/g, '').substring(0, 2)) || 1;
+    const diff = Math.abs(cepOrigemNum - cepDestinoNum);
+    
+    const basePrice = 15.0;
+    const distanceFactor = diff * 1.5;
+    const weightFactor = (peso_total / 1000) * 2.0;
+    
+    const pacPrice = basePrice + distanceFactor + weightFactor;
+    const sedexPrice = (basePrice + distanceFactor + weightFactor) * 1.8;
+    const pacTime = Math.max(3, Math.min(15, diff + 2));
+    const sedexTime = Math.max(1, Math.min(5, Math.floor(diff / 2) + 1));
+
     return {
       opcoes: [
         {
           id: 'fallback-sedex',
           nome: 'SEDEX',
           empresa: 'Correios',
-          preco: 25.50,
-          prazo: 2,
-          descricao: 'Frete padrão - Entrega em 2 dias úteis',
+          preco: sedexPrice,
+          prazo: sedexTime,
+          descricao: `SEDEX - Entrega em ${sedexTime} dias úteis`,
           codigo: 'SEDEX'
         },
         {
           id: 'fallback-pac',
           nome: 'PAC',
           empresa: 'Correios',
-          preco: 15.00,
-          prazo: 5,
-          descricao: 'Frete econômico - Entrega em 5 dias úteis',
+          preco: pacPrice,
+          prazo: pacTime,
+          descricao: `PAC - Entrega em ${pacTime} dias úteis`,
           codigo: 'PAC'
         }
       ],

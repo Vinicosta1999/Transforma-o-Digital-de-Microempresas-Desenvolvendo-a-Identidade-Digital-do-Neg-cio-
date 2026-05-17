@@ -54,25 +54,37 @@ export function registerFrenetProxy(app: Express) {
         ShipmentDiameter: 0,
       };
 
-      // Se não houver token, retornar fallback
+      // Se não houver token, retornar cálculo dinâmico simulado baseado no CEP
       if (!FRENET_TOKEN) {
-        console.log("[Frenet] Usando fallback (token não configurado)");
+        console.log("[Frenet] Usando cálculo dinâmico simulado (token não configurado)");
+        
+        // Lógica simples para variar o preço com base na distância dos CEPs
+        const diff = Math.abs(parseInt(cepOrigem.substring(0, 2)) - parseInt(cepDestino.substring(0, 2)));
+        const basePrice = 15.0;
+        const distanceFactor = diff * 1.5;
+        const weightFactor = products.reduce((acc: number, p: any) => acc + (p.weight || 0.5), 0) * 2.0;
+        
+        const pacPrice = (basePrice + distanceFactor + weightFactor).toFixed(2);
+        const sedexPrice = ((basePrice + distanceFactor + weightFactor) * 1.8).toFixed(2);
+        const pacTime = Math.max(3, Math.min(15, diff + 2));
+        const sedexTime = Math.max(1, Math.min(5, Math.floor(diff / 2) + 1));
+
         return res.json({
           ShippingSevicesArray: [
             {
               ServiceCode: 1,
               ServiceDescription: "SEDEX",
               Carrier: "Correios",
-              ShippingPrice: "25.50",
-              DeliveryTime: "2",
+              ShippingPrice: sedexPrice,
+              DeliveryTime: String(sedexTime),
               Error: false,
             },
             {
               ServiceCode: 2,
               ServiceDescription: "PAC",
               Carrier: "Correios",
-              ShippingPrice: "15.00",
-              DeliveryTime: "5",
+              ShippingPrice: pacPrice,
+              DeliveryTime: String(pacTime),
               Error: false,
             },
           ],
