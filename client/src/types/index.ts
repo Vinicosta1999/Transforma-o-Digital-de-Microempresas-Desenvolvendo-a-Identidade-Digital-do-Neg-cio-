@@ -28,7 +28,10 @@ export interface ItemCarrinho {
 
 export interface Carrinho {
   itens: ItemCarrinho[];
+  subtotal: number;
+  desconto: number;
   total: number;
+  cupom_codigo?: string;
 }
 
 export interface Usuario {
@@ -52,7 +55,10 @@ export interface Pedido {
   id: string;
   usuario_id: string;
   itens: ItemCarrinho[];
+  subtotal: number;
+  desconto: number;
   total: number;
+  cupom_codigo?: string;
   status: 'pendente' | 'processando' | 'enviado' | 'entregue' | 'cancelado';
   endereco_entrega: Usuario['endereco'];
   frete_info?: {

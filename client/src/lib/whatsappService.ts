@@ -20,6 +20,7 @@ export interface PedidoWhatsApp {
   cliente_cep: string;
   itens: ItemCarrinho[];
   subtotal: number;
+  desconto: number;
   frete: number;
   total: number;
   metodo_pagamento: 'whatsapp' | 'pix' | 'cartao';
@@ -82,6 +83,7 @@ export function gerarMensagemPedido(pedido: PedidoWhatsApp): string {
     ``,
     `💰 *Resumo Financeiro*`,
     `Subtotal: R$ ${pedido.subtotal.toFixed(2)}`,
+    `Desconto: R$ ${pedido.desconto.toFixed(2)}`,
     `Frete: R$ ${pedido.frete.toFixed(2)}`,
     `*Total: R$ ${pedido.total.toFixed(2)}*`,
     ``,
@@ -126,9 +128,10 @@ export function criarPedidoWhatsApp(
     cliente_cidade,
     cliente_cep,
     itens: carrinho.itens,
-    subtotal: carrinho.total,
+    subtotal: carrinho.subtotal,
+    desconto: carrinho.desconto,
     frete,
-    total: carrinho.total + frete,
+    total: carrinho.subtotal - carrinho.desconto + frete,
     metodo_pagamento,
     data_pedido: new Date().toISOString(),
   };

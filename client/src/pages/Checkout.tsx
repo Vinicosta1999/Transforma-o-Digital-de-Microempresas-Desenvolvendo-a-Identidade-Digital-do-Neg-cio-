@@ -60,7 +60,6 @@ export default function Checkout() {
           setEndereco(enderecoCompleto);
           toast.success('Endereço preenchido automaticamente!');
           
-          // Disparar cálculo de frete automaticamente após preencher endereço
           await handleCalcularFreteAutomatico(enderecoCompleto);
         } else {
           toast.error('CEP não encontrado');
@@ -96,10 +95,6 @@ export default function Checkout() {
       if (resultado.opcoes.length > 0) {
         setOpcoesFrete(resultado.opcoes);
         setFrete(resultado.opcoes[0]);
-        // Se já estiver na etapa de frete ou endereço, garante que as opções apareçam
-        if (etapa === 'endereco') {
-           // Opcional: avançar automaticamente ou apenas mostrar as opções abaixo
-        }
       }
     } catch (error) {
       console.error('Erro no cálculo automático:', error);
@@ -108,10 +103,10 @@ export default function Checkout() {
 
   if (!isAutenticado) {
     return (
-      <div className="min-h-screen py-8">
+      <div className="min-h-screen py-8 bg-[#0f172a]">
         <div className="container text-center">
-          <h1 className="text-3xl font-bold mb-4">Faça login para continuar</h1>
-          <p className="text-muted-foreground mb-8">
+          <h1 className="text-3xl font-bold mb-4 text-white">Faça login para continuar</h1>
+          <p className="text-slate-400 mb-8">
             Você precisa estar logado para completar a compra
           </p>
           <button
@@ -127,10 +122,10 @@ export default function Checkout() {
 
   if (carrinho.itens.length === 0) {
     return (
-      <div className="min-h-screen py-8">
+      <div className="min-h-screen py-8 bg-[#0f172a]">
         <div className="container text-center">
-          <h1 className="text-3xl font-bold mb-4">Seu carrinho está vazio</h1>
-          <p className="text-muted-foreground mb-8">
+          <h1 className="text-3xl font-bold mb-4 text-white">Seu carrinho está vazio</h1>
+          <p className="text-slate-400 mb-8">
             Adicione produtos antes de fazer checkout
           </p>
           <button
@@ -246,16 +241,18 @@ export default function Checkout() {
     }
   };
 
+  const totalFinal = carrinho.subtotal - carrinho.desconto + (frete?.preco || 0);
+
   return (
-    <div className="min-h-screen bg-background py-8">
+    <div className="min-h-screen bg-[#0f172a] text-white py-8">
       <div className="container">
         <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
         {etapa === 'confirmacao' ? (
-          <div className="bg-card border border-border rounded-lg p-8 text-center max-w-md mx-auto">
+          <div className="bg-[#1e293b] border border-slate-800 rounded-xl p-8 text-center max-w-md mx-auto">
             <div className="text-4xl mb-4">✅</div>
             <h2 className="text-2xl font-bold mb-4">Pedido Confirmado!</h2>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-slate-400 mb-6">
               {metodo_pagamento === 'whatsapp'
                 ? 'Seu pedido foi enviado para o WhatsApp. Aguarde a confirmação do vendedor.'
                 : 'Seu pagamento foi processado com sucesso!'}
@@ -272,9 +269,9 @@ export default function Checkout() {
             <div className="lg:col-span-2 space-y-6">
               {/* Etapa 1: Endereço */}
               {(etapa === 'endereco' || etapa === 'frete' || etapa === 'pagamento') && (
-                <div className="bg-card p-6 rounded-lg">
+                <div className="bg-[#1e293b] p-6 rounded-xl border border-slate-800">
                   <div className="flex items-center gap-3 mb-6">
-                    <MapPin className="w-6 h-6 text-primary" />
+                    <MapPin className="w-6 h-6 text-indigo-400" />
                     <h2 className="text-2xl font-bold">Endereço de Entrega</h2>
                   </div>
 
@@ -287,7 +284,7 @@ export default function Checkout() {
                         onChange={(e) =>
                           setEndereco({ ...endereco, rua: e.target.value })
                         }
-                        className="input-field"
+                        className="input-field bg-[#0f172a] border-slate-700"
                       />
                       <input
                         type="text"
@@ -296,7 +293,7 @@ export default function Checkout() {
                         onChange={(e) =>
                           setEndereco({ ...endereco, numero: e.target.value })
                         }
-                        className="input-field"
+                        className="input-field bg-[#0f172a] border-slate-700"
                       />
                     </div>
 
@@ -307,7 +304,7 @@ export default function Checkout() {
                       onChange={(e) =>
                         setEndereco({ ...endereco, complemento: e.target.value })
                       }
-                      className="input-field"
+                      className="input-field bg-[#0f172a] border-slate-700"
                     />
 
                     <div className="grid grid-cols-2 gap-4">
@@ -318,7 +315,7 @@ export default function Checkout() {
                         onChange={(e) =>
                           setEndereco({ ...endereco, bairro: e.target.value })
                         }
-                        className="input-field"
+                        className="input-field bg-[#0f172a] border-slate-700"
                       />
                       <input
                         type="text"
@@ -327,7 +324,7 @@ export default function Checkout() {
                         onChange={(e) =>
                           setEndereco({ ...endereco, cidade: e.target.value })
                         }
-                        className="input-field"
+                        className="input-field bg-[#0f172a] border-slate-700"
                       />
                     </div>
 
@@ -338,14 +335,14 @@ export default function Checkout() {
                         value={endereco.cep}
                         onChange={(e) => handleCEPChange(e.target.value)}
                         maxLength={9}
-                        className="input-field"
+                        className="input-field bg-[#0f172a] border-slate-700"
                       />
                       <select
                         value={endereco.estado}
                         onChange={(e) =>
                           setEndereco({ ...endereco, estado: e.target.value })
                         }
-                        className="input-field"
+                        className="input-field bg-[#0f172a] border-slate-700"
                       >
                         <option value="AC">AC</option>
                         <option value="AL">AL</option>
@@ -392,9 +389,9 @@ export default function Checkout() {
 
               {/* Etapa 2: Frete */}
               {(etapa === 'frete' || etapa === 'pagamento') && opcoesFrete.length > 0 && (
-                <div className="bg-card p-6 rounded-lg">
+                <div className="bg-[#1e293b] p-6 rounded-xl border border-slate-800">
                   <div className="flex items-center gap-3 mb-6">
-                    <Truck className="w-6 h-6 text-primary" />
+                    <Truck className="w-6 h-6 text-indigo-400" />
                     <h2 className="text-2xl font-bold">Opções de Frete</h2>
                   </div>
 
@@ -403,28 +400,28 @@ export default function Checkout() {
                       <div
                         key={opcao.id}
                         onClick={() => setFrete(opcao)}
-                        className={`p-4 rounded-lg border-2 cursor-pointer transition ${
+                        className={`p-4 rounded-xl border-2 cursor-pointer transition ${
                           frete?.id === opcao.id
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:border-primary/50'
+                            ? 'border-indigo-500 bg-indigo-500/10'
+                            : 'border-slate-700 hover:border-indigo-500/50'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-semibold">{opcao.nome}</p>
                             {opcao.empresa && (
-                              <p className="text-sm text-muted-foreground">{opcao.empresa}</p>
+                              <p className="text-sm text-slate-400">{opcao.empresa}</p>
                             )}
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-slate-400">
                               Entrega em {opcao.prazo} dia{opcao.prazo > 1 ? 's' : ''} úteis
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-bold text-primary">
+                            <p className="text-lg font-bold text-indigo-400">
                               R$ {opcao.preco.toFixed(2)}
                             </p>
                             {frete?.id === opcao.id && (
-                              <p className="text-xs text-primary font-semibold">✓ Selecionado</p>
+                              <p className="text-xs text-indigo-400 font-semibold">✓ Selecionado</p>
                             )}
                           </div>
                         </div>
@@ -445,16 +442,16 @@ export default function Checkout() {
 
               {/* Etapa 3: Pagamento */}
               {etapa === 'pagamento' && (
-                <div className="bg-card p-6 rounded-lg">
+                <div className="bg-[#1e293b] p-6 rounded-xl border border-slate-800">
                   <div className="flex items-center gap-3 mb-6">
-                    <CreditCard className="w-6 h-6 text-primary" />
+                    <CreditCard className="w-6 h-6 text-indigo-400" />
                     <h2 className="text-2xl font-bold">Método de Pagamento</h2>
                   </div>
 
                   <div className="space-y-4">
-                    <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition"
+                    <label className="flex items-center p-4 border-2 rounded-xl cursor-pointer transition"
                       style={{
-                        borderColor: metodo_pagamento === 'whatsapp' ? 'var(--color-primary)' : 'var(--color-border)',
+                        borderColor: metodo_pagamento === 'whatsapp' ? '#6366f1' : '#334155',
                         backgroundColor: metodo_pagamento === 'whatsapp' ? 'rgba(99, 102, 241, 0.1)' : 'transparent'
                       }}>
                       <input
@@ -467,13 +464,13 @@ export default function Checkout() {
                       />
                       <div>
                         <p className="font-bold">WhatsApp (Recomendado)</p>
-                        <p className="text-sm text-muted-foreground">Finalize o pedido e combine o pagamento diretamente com o vendedor</p>
+                        <p className="text-sm text-slate-400">Finalize o pedido e combine o pagamento diretamente com o vendedor</p>
                       </div>
                     </label>
 
-                    <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition"
+                    <label className="flex items-center p-4 border-2 rounded-xl cursor-pointer transition"
                       style={{
-                        borderColor: metodo_pagamento === 'cartao' ? 'var(--color-primary)' : 'var(--color-border)',
+                        borderColor: metodo_pagamento === 'cartao' ? '#6366f1' : '#334155',
                         backgroundColor: metodo_pagamento === 'cartao' ? 'rgba(99, 102, 241, 0.1)' : 'transparent'
                       }}>
                       <input
@@ -486,7 +483,7 @@ export default function Checkout() {
                       />
                       <div>
                         <p className="font-bold">Cartão de Crédito</p>
-                        <p className="text-sm text-muted-foreground">Pagamento online seguro e imediato</p>
+                        <p className="text-sm text-slate-400">Pagamento online seguro e imediato</p>
                       </div>
                     </label>
 
@@ -497,14 +494,14 @@ export default function Checkout() {
                           placeholder="Nome no Cartão"
                           value={pagamento.titular}
                           onChange={(e) => setPagamento({ ...pagamento, titular: e.target.value })}
-                          className="input-field"
+                          className="input-field bg-[#0f172a] border-slate-700"
                         />
                         <input
                           type="text"
                           placeholder="Número do Cartão"
                           value={pagamento.numero}
                           onChange={(e) => setPagamento({ ...pagamento, numero: e.target.value })}
-                          className="input-field"
+                          className="input-field bg-[#0f172a] border-slate-700"
                         />
                         <div className="grid grid-cols-2 gap-4">
                           <input
@@ -512,14 +509,14 @@ export default function Checkout() {
                             placeholder="Validade (MM/AA)"
                             value={pagamento.validade}
                             onChange={(e) => setPagamento({ ...pagamento, validade: e.target.value })}
-                            className="input-field"
+                            className="input-field bg-[#0f172a] border-slate-700"
                           />
                           <input
                             type="text"
                             placeholder="CVV"
                             value={pagamento.cvv}
                             onChange={(e) => setPagamento({ ...pagamento, cvv: e.target.value })}
-                            className="input-field"
+                            className="input-field bg-[#0f172a] border-slate-700"
                           />
                         </div>
                       </div>
@@ -539,38 +536,47 @@ export default function Checkout() {
 
             {/* Resumo do Pedido */}
             <div className="lg:col-span-1">
-              <div className="bg-card p-6 rounded-lg sticky top-20">
+              <div className="bg-[#1e293b] p-6 rounded-xl sticky top-20 border border-slate-800">
                 <h3 className="text-xl font-bold mb-6">Resumo do Pedido</h3>
 
-                <div className="space-y-3 mb-6 pb-6 border-b border-border">
+                <div className="space-y-3 mb-6 pb-6 border-b border-slate-700">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>R$ {carrinho.total.toFixed(2)}</span>
+                    <span className="text-slate-400">Subtotal</span>
+                    <span>R$ {carrinho.subtotal.toFixed(2)}</span>
                   </div>
+                  {carrinho.desconto > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-400">Desconto</span>
+                      <span className="text-emerald-400">- R$ {carrinho.desconto.toFixed(2)}</span>
+                    </div>
+                  )}
                   {frete && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Frete</span>
+                      <span className="text-slate-400">Frete</span>
                       <span>R$ {frete.preco.toFixed(2)}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-between text-lg font-bold mb-6">
+                <div className="flex justify-between text-xl font-bold mb-6">
                   <span>Total</span>
-                  <span className="text-primary">
-                    R$ {(carrinho.total + (frete?.preco || 0)).toFixed(2)}
+                  <span className="text-amber-500">
+                    R$ {totalFinal.toFixed(2)}
                   </span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   {carrinho.itens.map((item) => {
                     const produto = PRODUTOS.find(p => p.id === item.produto_id);
                     return (
-                      <div key={item.produto_id} className="text-sm">
-                        <p className="font-semibold">{produto?.nome || `Produto ID: ${item.produto_id}`}</p>
-                        <p className="text-muted-foreground">
-                          {item.quantidade}x R$ {item.preco_unitario.toFixed(2)}
-                        </p>
+                      <div key={item.produto_id} className="flex gap-3 text-sm">
+                        <img src={produto?.imagem} alt="" className="w-12 h-12 object-contain bg-white rounded p-1" />
+                        <div className="flex-1">
+                          <p className="font-semibold text-slate-200 line-clamp-1">{produto?.nome || `Produto ID: ${item.produto_id}`}</p>
+                          <p className="text-slate-400">
+                            {item.quantidade}x R$ {item.preco_unitario.toFixed(2)}
+                          </p>
+                        </div>
                       </div>
                     );
                   })}

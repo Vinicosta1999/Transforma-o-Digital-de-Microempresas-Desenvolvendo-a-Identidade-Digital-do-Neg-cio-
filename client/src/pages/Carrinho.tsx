@@ -2,17 +2,18 @@ import { Link } from 'wouter';
 import { Trash2, Plus, Minus, ArrowLeft } from 'lucide-react';
 import { useCarrinho } from '@/contexts/CarrinhoContext';
 import { PRODUTOS } from '@/lib/produtos';
+import AplicarCupom from '@/components/AplicarCupom';
 
 export default function Carrinho() {
-  const { carrinho, removerItem, atualizarQuantidade } = useCarrinho();
+  const { carrinho, removerItem, atualizarQuantidade, aplicarDesconto } = useCarrinho();
 
   if (carrinho.itens.length === 0) {
     return (
-      <div className="min-h-screen py-8">
+      <div className="min-h-screen py-8 bg-[#0f172a]">
         <div className="container">
           <div className="text-center py-16">
-            <h1 className="text-4xl font-bold mb-4">Seu Carrinho está Vazio</h1>
-            <p className="text-muted-foreground mb-8">
+            <h1 className="text-4xl font-bold mb-4 text-white">Seu Carrinho está Vazio</h1>
+            <p className="text-slate-400 mb-8">
               Explore nosso catálogo e adicione alguns produtos
             </p>
             <Link href="/catalogo">
@@ -28,10 +29,10 @@ export default function Carrinho() {
   }
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-8 bg-[#0f172a] text-white">
       <div className="container">
         <Link href="/catalogo">
-          <div className="flex items-center gap-2 text-primary hover:underline mb-8 cursor-pointer">
+          <div className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 mb-8 cursor-pointer transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Continuar Comprando
           </div>
@@ -48,58 +49,60 @@ export default function Carrinho() {
                 if (!produto) return null;
 
                 return (
-                  <div key={item.produto_id} className="bg-card p-4 rounded-lg flex gap-4">
+                  <div key={item.produto_id} className="bg-[#1e293b] p-4 rounded-xl flex gap-4 border border-slate-800">
                     {/* Imagem */}
-                    <img
-                      src={produto.imagem}
-                      alt={produto.nome}
-                      className="w-24 h-24 object-cover rounded-lg bg-white"
-                    />
+                    <div className="bg-white p-1 rounded-lg">
+                      <img
+                        src={produto.imagem}
+                        alt={produto.nome}
+                        className="w-24 h-24 object-contain rounded-lg"
+                      />
+                    </div>
 
                     {/* Informações */}
                     <div className="flex-1">
-                      <h3 className="font-bold text-lg mb-1">{produto.nome}</h3>
-                      <p className="text-muted-foreground text-sm mb-3">
+                      <h3 className="font-bold text-lg mb-1 text-slate-100">{produto.nome}</h3>
+                      <p className="text-slate-400 text-sm mb-3 line-clamp-2">
                         {produto.descricao}
                       </p>
-                      <p className="font-mono font-bold text-accent">
+                      <p className="font-bold text-amber-500">
                         R$ {item.preco_unitario.toFixed(2)}
                       </p>
                     </div>
 
                     {/* Quantidade e Ações */}
-                    <div className="flex flex-col items-end gap-3">
+                    <div className="flex flex-col items-end justify-between">
                       <button
                         onClick={() => removerItem(item.produto_id)}
-                        className="text-destructive hover:bg-destructive/10 p-2 rounded-lg transition"
+                        className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg transition"
                         title="Remover do carrinho"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
 
-                      <div className="flex items-center gap-2 bg-secondary rounded-lg">
+                      <div className="flex items-center gap-3 bg-[#0f172a] p-1 rounded-lg border border-slate-700">
                         <button
                           onClick={() =>
                             atualizarQuantidade(item.produto_id, item.quantidade - 1)
                           }
-                          className="p-1 hover:bg-muted rounded"
+                          className="p-1 hover:bg-slate-800 rounded text-slate-400"
                         >
                           <Minus className="w-4 h-4" />
                         </button>
-                        <span className="w-8 text-center font-semibold">
+                        <span className="w-6 text-center font-semibold text-slate-200">
                           {item.quantidade}
                         </span>
                         <button
                           onClick={() =>
                             atualizarQuantidade(item.produto_id, item.quantidade + 1)
                           }
-                          className="p-1 hover:bg-muted rounded"
+                          className="p-1 hover:bg-slate-800 rounded text-slate-400"
                         >
                           <Plus className="w-4 h-4" />
                         </button>
                       </div>
 
-                      <p className="font-bold text-lg">
+                      <p className="font-bold text-xl text-white">
                         R$ {(item.preco_unitario * item.quantidade).toFixed(2)}
                       </p>
                     </div>
@@ -111,44 +114,53 @@ export default function Carrinho() {
 
           {/* Resumo do Carrinho */}
           <div className="lg:col-span-1">
-            <div className="bg-card p-6 rounded-lg sticky top-20">
+            <div className="bg-[#1e293b] p-6 rounded-xl sticky top-20 border border-slate-800">
               <h2 className="text-2xl font-bold mb-6">Resumo</h2>
 
-              <div className="space-y-4 mb-6 pb-6 border-b border-border">
+              <div className="space-y-4 mb-6 pb-6 border-b border-slate-700">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-semibold">R$ {carrinho.total.toFixed(2)}</span>
+                  <span className="text-slate-400">Subtotal</span>
+                  <span className="font-semibold">R$ {carrinho.subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Frete</span>
-                  <span className="font-semibold text-accent">A calcular</span>
+                  <span className="text-slate-400">Frete</span>
+                  <span className="font-semibold text-amber-500">A calcular</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Desconto</span>
-                  <span className="font-semibold text-green-400">R$ 0,00</span>
+                  <span className="text-slate-400">Desconto</span>
+                  <span className="font-semibold text-emerald-400">R$ {carrinho.desconto.toFixed(2)}</span>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-lg font-bold">Total</span>
-                <span className="text-2xl font-bold text-accent">
+              <div className="flex justify-between items-center mb-8">
+                <span className="text-xl font-bold">Total</span>
+                <span className="text-3xl font-bold text-amber-500">
                   R$ {carrinho.total.toFixed(2)}
                 </span>
               </div>
 
-              <Link href="/checkout">
-                <div className="btn-primary w-full text-center block mb-3 cursor-pointer">
-                  Ir para Checkout
-                </div>
-              </Link>
+              <div className="space-y-3">
+                <Link href="/checkout">
+                  <div className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl text-center block cursor-pointer transition-colors shadow-lg shadow-indigo-900/20">
+                    Ir para Checkout
+                  </div>
+                </Link>
 
-              <Link href="/catalogo">
-                <div className="btn-secondary w-full text-center block cursor-pointer">
-                  Continuar Comprando
-                </div>
-              </Link>
+                <Link href="/catalogo">
+                  <div className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-4 rounded-xl text-center block cursor-pointer transition-colors">
+                    Continuar Comprando
+                  </div>
+                </Link>
+              </div>
 
-              <p className="text-xs text-muted-foreground text-center mt-4">
+              <div className="mt-8">
+                <AplicarCupom 
+                  total_compra={carrinho.subtotal} 
+                  onCupomAplicado={(desconto, cupom) => aplicarDesconto(desconto, cupom)} 
+                />
+              </div>
+
+              <p className="text-xs text-slate-500 text-center mt-6">
                 O frete será calculado no checkout
               </p>
             </div>

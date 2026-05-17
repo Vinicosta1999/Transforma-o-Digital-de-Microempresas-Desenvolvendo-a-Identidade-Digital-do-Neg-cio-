@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 interface AplicarCupomProps {
   total_compra: number;
-  onCupomAplicado?: (desconto: number) => void;
+  onCupomAplicado?: (desconto: number, codigo?: string) => void;
 }
 
 export default function AplicarCupom({ total_compra, onCupomAplicado }: AplicarCupomProps) {
@@ -30,7 +30,7 @@ export default function AplicarCupom({ total_compra, onCupomAplicado }: AplicarC
         { codigo: resultado.cupom_aplicado.codigo } as any,
         resultado.cupom_aplicado.desconto_valor
       ));
-      onCupomAplicado?.(resultado.cupom_aplicado.desconto_valor);
+      onCupomAplicado?.(resultado.cupom_aplicado.desconto_valor, resultado.cupom_aplicado.codigo);
     } else {
       toast.error(resultado.erro || 'Erro ao aplicar cupom');
     }
@@ -41,7 +41,7 @@ export default function AplicarCupom({ total_compra, onCupomAplicado }: AplicarC
     setCupomAplicado(null);
     setCodigo('');
     toast.success('Cupom removido');
-    onCupomAplicado?.(0);
+    onCupomAplicado?.(0, undefined);
   };
 
   const cuponsDisponiveis = obterCuponsDisponiveis();

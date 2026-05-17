@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Carrinho, ItemCarrinho, Produto } from '@/types';
 import { supabaseClient } from '@/lib/supabaseClient';
+import { obterCupomAplicado } from '@/lib/cupomService';
 
 interface CarrinhoContextType {
   carrinho: Carrinho;
@@ -8,13 +9,19 @@ interface CarrinhoContextType {
   removerItem: (produto_id: string) => void;
   atualizarQuantidade: (produto_id: string, quantidade: number) => void;
   limparCarrinho: () => void;
+  aplicarDesconto: (desconto: number, cupom_codigo?: string) => void;
   totalItens: number;
 }
 
 const CarrinhoContext = createContext<CarrinhoContextType | undefined>(undefined);
 
 export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
-  const [carrinho, setCarrinho] = useState<Carrinho>({ itens: [], total: 0 });
+  const [carrinho, setCarrinho] = useState<Carrinho>({ 
+    itens: [], 
+    subtotal: 0, 
+    desconto: 0, 
+    total: 0 
+  });
   const [usuarioId, setUsuarioId] = useState<string | null>(null);
 
   // Obter usuário do localStorage
@@ -29,22 +36,39 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
   // Carregar carrinho do localStorage e Supabase
   useEffect(() => {
     const carrinhoSalvo = localStorage.getItem('carrinho_case_point');
+    const cupomAplicado = obterCupomAplicado();
+    
     if (carrinhoSalvo) {
-      setCarrinho(JSON.parse(carrinhoSalvo));
+      const parsed = JSON.parse(carrinhoSalvo);
+      const subtotal = parsed.itens.reduce((acc: number, item: any) => acc + item.preco_unitario * item.quantidade, 0);
+      const desconto = cupomAplicado ? cupomAplicado.desconto_valor : 0;
+      
+      setCarrinho({
+        ...parsed,
+        subtotal,
+        desconto,
+        total: subtotal - desconto,
+        cupom_codigo: cupomAplicado?.codigo
+      });
     }
 
     // Se usuário está logado, tentar carregar do Supabase
     if (usuarioId && supabaseClient && typeof supabaseClient.getCarrinho === 'function') {
       supabaseClient.getCarrinho(usuarioId).then((carrinhoSupabase) => {
         if (carrinhoSupabase) {
+          const subtotal = carrinhoSupabase.itens.reduce((acc: number, item: any) => acc + item.preco_unitario * item.quantidade, 0);
+          const desconto = cupomAplicado ? cupomAplicado.desconto_valor : 0;
+          
           setCarrinho({
             itens: carrinhoSupabase.itens,
-            total: carrinhoSupabase.total,
+            subtotal,
+            desconto,
+            total: subtotal - desconto,
+            cupom_codigo: cupomAplicado?.codigo
           });
         }
       }).catch((error) => {
         console.warn('Erro ao carregar carrinho do Supabase:', error);
-        // Continuar com carrinho do localStorage
       });
     }
   }, [usuarioId]);
@@ -53,7 +77,6 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     localStorage.setItem('carrinho_case_point', JSON.stringify(carrinho));
 
-    // Se usuário está logado, salvar no Supabase
     if (usuarioId && supabaseClient && typeof supabaseClient.salvarCarrinho === 'function') {
       supabaseClient.salvarCarrinho({
         id: `carrinho_${usuarioId}`,
@@ -63,7 +86,6 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
         atualizado_em: new Date().toISOString(),
       }).catch((error) => {
         console.warn('Erro ao salvar carrinho no Supabase:', error);
-        // Continuar com localStorage
       });
     }
   }, [carrinho, usuarioId]);
@@ -90,17 +112,19 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
         ];
       }
 
-      const total = novoItens.reduce((acc, item) => acc + item.preco_unitario * item.quantidade, 0);
+      const subtotal = novoItens.reduce((acc, item) => acc + item.preco_unitario * item.quantidade, 0);
+      const total = subtotal - prev.desconto;
 
-      return { itens: novoItens, total };
+      return { ...prev, itens: novoItens, subtotal, total };
     });
   };
 
   const removerItem = (produto_id: string) => {
     setCarrinho((prev) => {
       const novoItens = prev.itens.filter((item) => item.produto_id !== produto_id);
-      const total = novoItens.reduce((acc, item) => acc + item.preco_unitario * item.quantidade, 0);
-      return { itens: novoItens, total };
+      const subtotal = novoItens.reduce((acc, item) => acc + item.preco_unitario * item.quantidade, 0);
+      const total = subtotal - prev.desconto;
+      return { ...prev, itens: novoItens, subtotal, total };
     });
   };
 
@@ -114,13 +138,23 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
       const novoItens = prev.itens.map((item) =>
         item.produto_id === produto_id ? { ...item, quantidade } : item
       );
-      const total = novoItens.reduce((acc, item) => acc + item.preco_unitario * item.quantidade, 0);
-      return { itens: novoItens, total };
+      const subtotal = novoItens.reduce((acc, item) => acc + item.preco_unitario * item.quantidade, 0);
+      const total = subtotal - prev.desconto;
+      return { ...prev, itens: novoItens, subtotal, total };
     });
   };
 
+  const aplicarDesconto = (desconto: number, cupom_codigo?: string) => {
+    setCarrinho((prev) => ({
+      ...prev,
+      desconto,
+      cupom_codigo,
+      total: prev.subtotal - desconto
+    }));
+  };
+
   const limparCarrinho = () => {
-    setCarrinho({ itens: [], total: 0 });
+    setCarrinho({ itens: [], subtotal: 0, desconto: 0, total: 0 });
     localStorage.removeItem('carrinho_case_point');
     if (usuarioId && supabaseClient && typeof supabaseClient.limparCarrinho === 'function') {
       supabaseClient.limparCarrinho(usuarioId).catch((error) => {
@@ -139,6 +173,7 @@ export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
         removerItem,
         atualizarQuantidade,
         limparCarrinho,
+        aplicarDesconto,
         totalItens,
       }}
     >

@@ -52,48 +52,48 @@ function App() {
           <CarrinhoProvider>
             <TooltipProvider>
               <Toaster />
-              <div className="flex flex-col min-h-screen">
+              <div className="flex flex-col min-h-screen bg-[#0f172a]">
                 <Header />
                 <main className="flex-1">
                   <Router />
                 </main>
-                <footer className="bg-card border-t border-border py-8 mt-16">
+                <footer className="bg-[#0f172a] border-t border-slate-800 py-8 mt-16 text-white">
                   <div className="container">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                       <div>
                         <h3 className="font-bold mb-4">Sobre</h3>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                          <li><a href="#" className="hover:text-primary transition">Sobre Nós</a></li>
-                          <li><a href="#" className="hover:text-primary transition">Carreiras</a></li>
-                          <li><a href="#" className="hover:text-primary transition">Blog</a></li>
+                        <ul className="space-y-2 text-sm text-slate-400">
+                          <li><a href="#" className="hover:text-indigo-400 transition">Sobre Nós</a></li>
+                          <li><a href="#" className="hover:text-indigo-400 transition">Carreiras</a></li>
+                          <li><a href="#" className="hover:text-indigo-400 transition">Blog</a></li>
                         </ul>
                       </div>
                       <div>
                         <h3 className="font-bold mb-4">Suporte</h3>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                          <li><a href="#" className="hover:text-primary transition">Contato</a></li>
-                          <li><a href="#" className="hover:text-primary transition">FAQ</a></li>
-                          <li><a href="#" className="hover:text-primary transition">Rastreamento</a></li>
+                        <ul className="space-y-2 text-sm text-slate-400">
+                          <li><a href="#" className="hover:text-indigo-400 transition">Contato</a></li>
+                          <li><a href="#" className="hover:text-indigo-400 transition">FAQ</a></li>
+                          <li><a href="#" className="hover:text-indigo-400 transition">Rastreamento</a></li>
                         </ul>
                       </div>
                       <div>
                         <h3 className="font-bold mb-4">Legal</h3>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                          <li><a href="#" className="hover:text-primary transition">Privacidade</a></li>
-                          <li><a href="#" className="hover:text-primary transition">Termos</a></li>
-                          <li><a href="#" className="hover:text-primary transition">Cookies</a></li>
+                        <ul className="space-y-2 text-sm text-slate-400">
+                          <li><a href="#" className="hover:text-indigo-400 transition">Privacidade</a></li>
+                          <li><a href="#" className="hover:text-indigo-400 transition">Termos</a></li>
+                          <li><a href="#" className="hover:text-indigo-400 transition">Cookies</a></li>
                         </ul>
                       </div>
                       <div>
                         <h3 className="font-bold mb-4">Redes Sociais</h3>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                          <li><a href="#" className="hover:text-primary transition">Facebook</a></li>
-                          <li><a href="#" className="hover:text-primary transition">Instagram</a></li>
-                          <li><a href="#" className="hover:text-primary transition">Twitter</a></li>
+                        <ul className="space-y-2 text-sm text-slate-400">
+                          <li><a href="#" className="hover:text-indigo-400 transition">Facebook</a></li>
+                          <li><a href="#" className="hover:text-indigo-400 transition">Instagram</a></li>
+                          <li><a href="#" className="hover:text-indigo-400 transition">Twitter</a></li>
                         </ul>
                       </div>
                     </div>
-                    <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
+                    <div className="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
                       <p>&copy; 2026 Case Point. Todos os direitos reservados.</p>
                     </div>
                   </div>
