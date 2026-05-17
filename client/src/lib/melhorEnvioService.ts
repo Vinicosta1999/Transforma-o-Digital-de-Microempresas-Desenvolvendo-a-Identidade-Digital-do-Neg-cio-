@@ -2,10 +2,10 @@
  * Serviço de Integração com API Frenet
  * Cálculo de frete em tempo real
  * 
- * Documentação: https://www.frenet.com.br/api/
+ * Usando Proxy do Netlify (/api/frenet) para evitar erros de CORS
  */
 
-const FRENET_API_URL = 'https://api.frenet.com.br/api';
+const API_URL = '/api/frenet';
 const FRENET_TOKEN = '0D9AED5DR0AB7R4086R96AARD1BC23F46D81';
 
 export interface ProdutoFrete {
@@ -52,7 +52,7 @@ export interface CalculoFrete {
 }
 
 /**
- * Calcula opções de frete reais via API Frenet (Chamada Direta no Cliente para Netlify)
+ * Calcula opções de frete reais via Proxy do Netlify
  */
 export async function calcularFrete(
   produtos: ProdutoFrete[],
@@ -84,7 +84,8 @@ export async function calcularFrete(
       ShipmentDiameter: 0,
     };
 
-    const response = await fetch(`${FRENET_API_URL}/Shipping`, {
+    // Chamada através do proxy configurado no netlify.toml
+    const response = await fetch(`${API_URL}/Shipping`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -95,7 +96,7 @@ export async function calcularFrete(
     });
 
     if (!response.ok) {
-      throw new Error('Erro ao consultar API Frenet');
+      throw new Error('Erro ao consultar API via Proxy');
     }
 
     const data = await response.json();
@@ -134,9 +135,8 @@ export async function calcularFrete(
     };
 
   } catch (error) {
-    console.warn('Erro ao calcular frete na API real, usando fallback:', error);
+    console.warn('Erro no cálculo real, usando fallback:', error);
     
-    // Fallback realista baseado em distância de CEPs
     const cepOrigemNum = parseInt(cep_origem.replace(/\D/g, '').substring(0, 2)) || 1;
     const cepDestinoNum = parseInt(endereco_destino.cep.replace(/\D/g, '').substring(0, 2)) || 1;
     const diff = Math.abs(cepOrigemNum - cepDestinoNum);
@@ -220,7 +220,7 @@ export async function buscarCEP(cep: string): Promise<EnderecoEntrega | null> {
 
 export async function rastrearEnvio(numero_rastreamento: string): Promise<any> {
   try {
-    const response = await fetch(`${FRENET_API_URL}/Tracking/${numero_rastreamento}`, {
+    const response = await fetch(`${API_URL}/Tracking/${numero_rastreamento}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',

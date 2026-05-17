@@ -1,10 +1,11 @@
-[build]
-  command = "pnpm build"
-  functions = "netlify/functions"
+[[redirects]]
+  from = "/api/frenet/*"
+  to = "https://api.frenet.com.br/api/:splat"
+  status = 200
+  force = true
+  headers = {X-From = "Netlify"}
 
-# 🟢 CONFIGURAÇÃO CORRIGIDA EM FORMATO DE OBJETO:
-[functions]
-  external_node_modules = ["@tailwindcss/oxide", "lightningcss", "@babel/core"]
-
-[functions.calcular-frete]
-  node_bundle = true
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
