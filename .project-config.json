@@ -1,0 +1,43 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [
+    "server",
+    "db",
+    "user"
+  ],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://2m8WAgDMHcerRtQ.root:VCzAOsU3b9v04uqV7UA7@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/9uEAfMFNCeg9TisG4oUJ2C?ssl={\"rejectUnauthorized\":true}",
+    "DRIZZLE_DATABASE_URL": "mysql://2m8WAgDMHcerRtQ.root:VCzAOsU3b9v04uqV7UA7@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/9uEAfMFNCeg9TisG4oUJ2C?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": null,
+  "git_remote": {
+    "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663414920193/9uEAfMFNCeg9TisG4oUJ2C",
+    "access_key_id": "ASIAZV3A2ECZO6W77TPE",
+    "secret_access_key": "qgrchyE+yqamSAa1p0acIO32Mj5DyXn3YJp9rc43",
+    "session_token": "IQoJb3JpZ2luX2VjEN///////////wEaCXVzLWVhc3QtMSJIMEYCIQD1DXkLIUnajrXnpmbjQWMXKJQM5jihLzgotOsd5w6MewIhAOHTOPSa+XJ0GdyM4LD6raeWkMun/jgUG9ddHcyF93EEKv8DCKj//////////wEQBBoMNjY1Mzg2MDk4ODY2IgzGpTJWJcVOu7RkIN0q0wMYPCRdcZDWV6pacMqdUVncqNU8tlT2cLfO2lZdVknV6jCOrI+57sCKgTXeqtjeLyfkAbUK+bMf4OWeqLaY5pY2cSut+MUdsjNNhoPrrQ3DatNpD+6wiqRR7pAc3nqNZJw2Zo4kIJiQRQPRIks+4j0UjAj6nzkwahgPcoYT2zAEtmPb1QOp3ypR3yHgmZTgY05I+vLhGP8xJss6Zeomg4za1yzzqfloDG4F39T28/Onc21pJMMKgUuXAxu9x3gLqdnJANx9/V3JFUaqHSlN3v0Yy5BH49FLHhKyTUmLy7UQI2HdfMgYIQBi3xDdOetH655ywEp0wbFybwu1HGxmXw1lMelazC1F/8SR6c/vWBiFLivdhLyJBzZxvTzLtpukrGWZ8i4ohV2CgR2VmIkbTBpGR/zd87RXigz8SP1dImK5k5Q7nEWMlT4vC1Me3nleI2vgWy8oi4ctzg0zu2dF4CClAyROIMV6Bv8umQJX/OxgvY9ikf5O28R4PQtW5Mp7DfuRKgDFnee6BmEkSM9+U4BMj/tuJjxjpNJXuFaV/U8LgYE9vm3AXqXg+g4PPNLhCHo0ioQbx7QUWFUoLodq7J0lzPbjIsdg44Kt30jvMyeMZ5UYgzCkn6fQBjqcAVcRu3c9JW/oitYgoioEgXpSb1HsslY9mRHq0Prxqr5389rPSr0yVYNSnhP+C+K/5QOtrTDrmt+KCLpb19tiBj0v9YqjN8ICeSY7ylVavhVv5U2THDVegd8RZf2/GQg9QNOEMDG0mv8INqg6Yas3WiWn2wF1LPXpj4i7QqOdsVydAgEd0QOMhqcql7p/QQNdhMiSJkyG705MHApoBQ==",
+    "expiration": "2026-05-18T02:24:36.000Z"
+  },
+  "name": "case-point-ecommerce",
+  "path": "/home/ubuntu/case-point-ecommerce",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "GffRxqMCnEr9twHqDuSSrB",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "FRENET_API_TOKEN": "0D9AED5DR0AB7R4086R96AARD1BC23F46D81",
+    "JWT_SECRET": "nLxNVpwNdoVtykdBfiqiZX",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "LiliEpapi Madrigal",
+    "OWNER_OPEN_ID": "QyR7yjEichopSjbGxaDYUB",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "c36c9ea0-8bc9-445d-be2b-ca173ca5caaa",
+    "VITE_APP_ID": "9uEAfMFNCeg9TisG4oUJ2C",
+    "VITE_APP_LOGO": "https://files.manuscdn.com/user_upload_by_module/web_dev_logo/310519663414920193/YtWPnHMrnRgyUjUV.png",
+    "VITE_APP_TITLE": "Case Point E-commerce",
+    "VITE_FRONTEND_FORGE_API_KEY": "DRyFSApPL9aXprfaHkxiKw",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "web-db-user",
+  "test_command": "pnpm test"
+}
