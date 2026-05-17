@@ -81,16 +81,16 @@ export default function Checkout() {
         return {
           id: item.produto_id,
           nome: produtoReal?.nome || 'Produto',
-          peso: produtoReal?.peso || 500,
-          comprimento: produtoReal?.dimensoes.comprimento || 20,
-          largura: produtoReal?.dimensoes.largura || 20,
-          altura: produtoReal?.dimensoes.altura || 20,
-          valor: item.preco_unitario,
-          quantidade: item.quantidade
+          weight: produtoReal?.peso || 500,
+          length: produtoReal?.dimensoes.comprimento || 20,
+          width: produtoReal?.dimensoes.largura || 20,
+          height: produtoReal?.dimensoes.altura || 20,
+          value: item.preco_unitario,
+          quantity: item.quantidade
         };
       });
 
-      const resultado = await calcularFrete(produtosFrete, enderecoAtual);
+      const resultado = await calcularFrete(produtosFrete as any, enderecoAtual);
       
       if (resultado.opcoes.length > 0) {
         setOpcoesFrete(resultado.opcoes);
@@ -161,7 +161,7 @@ export default function Checkout() {
         };
       });
 
-      const resultado = await calcularFrete(produtosFrete, endereco);
+      const resultado = await calcularFrete(produtosFrete as any, endereco);
       
       if (resultado.opcoes.length > 0) {
         setOpcoesFrete(resultado.opcoes);
@@ -244,20 +244,20 @@ export default function Checkout() {
   const totalFinal = carrinho.subtotal - carrinho.desconto + (frete?.preco || 0);
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white py-4 sm:py-8">
+    <div className="min-h-screen bg-[#0f172a] text-white py-4 sm:py-6">
       <div className="container px-4">
-        <div className="flex items-center gap-4 mb-8">
-          <button onClick={() => setLocation('/carrinho')} className="p-2 hover:bg-slate-800 rounded-lg transition">
+        <div className="flex items-center gap-3 mb-6">
+          <button onClick={() => setLocation('/carrinho')} className="p-1.5 hover:bg-slate-800 rounded-lg transition">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold">Checkout</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Checkout</h1>
         </div>
 
         {etapa === 'confirmacao' ? (
-          <div className="bg-[#1e293b] border border-slate-800 rounded-xl p-8 text-center max-w-md mx-auto shadow-2xl">
-            <div className="text-4xl mb-4">✅</div>
-            <h2 className="text-2xl font-bold mb-4">Pedido Confirmado!</h2>
-            <p className="text-slate-400 mb-6">
+          <div className="bg-[#1e293b] border border-slate-800 rounded-xl p-6 text-center max-w-md mx-auto shadow-2xl">
+            <div className="text-4xl mb-3">✅</div>
+            <h2 className="text-xl font-bold mb-3">Pedido Confirmado!</h2>
+            <p className="text-slate-400 mb-6 text-sm">
               {metodo_pagamento === 'whatsapp'
                 ? 'Seu pedido foi enviado para o WhatsApp. Aguarde a confirmação do vendedor.'
                 : 'Seu pagamento foi processado com sucesso!'}
@@ -270,19 +270,19 @@ export default function Checkout() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
               {/* Etapa 1: Endereço */}
               {(etapa === 'endereco' || etapa === 'frete' || etapa === 'pagamento') && (
-                <div className="bg-[#1e293b] p-5 sm:p-6 rounded-xl border border-slate-800 shadow-lg">
-                  <div className="flex items-center gap-3 mb-6">
-                    <MapPin className="w-6 h-6 text-indigo-400" />
-                    <h2 className="text-xl sm:text-2xl font-bold">Endereço de Entrega</h2>
+                <div className="bg-[#1e293b] p-4 sm:p-5 rounded-xl border border-slate-800 shadow-lg">
+                  <div className="flex items-center gap-2 mb-4">
+                    <MapPin className="w-5 h-5 text-indigo-400" />
+                    <h2 className="text-lg font-bold">Endereço de Entrega</h2>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {/* Linha 1: Rua e Número */}
-                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                       <div className="sm:col-span-3">
                         <label htmlFor="rua" className="sr-only">Rua</label>
                         <input
@@ -292,7 +292,7 @@ export default function Checkout() {
                           placeholder="Rua"
                           value={endereco.rua}
                           onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
-                          className="input-field bg-[#0f172a] border-slate-700"
+                          className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm"
                         />
                       </div>
                       <div>
@@ -304,7 +304,7 @@ export default function Checkout() {
                           placeholder="Número"
                           value={endereco.numero}
                           onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
-                          className="input-field bg-[#0f172a] border-slate-700"
+                          className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm"
                         />
                       </div>
                     </div>
@@ -319,13 +319,13 @@ export default function Checkout() {
                         placeholder="Complemento (opcional)"
                         value={endereco.complemento}
                         onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
-                        className="input-field bg-[#0f172a] border-slate-700"
+                        className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm"
                       />
                     </div>
 
                     {/* Linha 3: Bairro e Cidade */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                      <div className="sm:col-span-3">
                         <label htmlFor="bairro" className="sr-only">Bairro</label>
                         <input
                           id="bairro"
@@ -334,10 +334,10 @@ export default function Checkout() {
                           placeholder="Bairro"
                           value={endereco.bairro}
                           onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
-                          className="input-field bg-[#0f172a] border-slate-700"
+                          className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm w-full"
                         />
                       </div>
-                      <div>
+                      <div className="sm:col-span-2">
                         <label htmlFor="cidade" className="sr-only">Cidade</label>
                         <input
                           id="cidade"
@@ -346,13 +346,13 @@ export default function Checkout() {
                           placeholder="Cidade"
                           value={endereco.cidade}
                           onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })}
-                          className="input-field bg-[#0f172a] border-slate-700"
+                          className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm w-full"
                         />
                       </div>
                     </div>
 
                     {/* Linha 4: CEP e UF */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
                         <label htmlFor="cep" className="sr-only">CEP</label>
                         <input
@@ -363,7 +363,7 @@ export default function Checkout() {
                           value={endereco.cep}
                           onChange={(e) => handleCEPChange(e.target.value)}
                           maxLength={9}
-                          className="input-field bg-[#0f172a] border-slate-700"
+                          className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm"
                         />
                       </div>
                       <div>
@@ -373,7 +373,7 @@ export default function Checkout() {
                           name="estado"
                           value={endereco.estado}
                           onChange={(e) => setEndereco({ ...endereco, estado: e.target.value })}
-                          className="input-field bg-[#0f172a] border-slate-700"
+                          className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm"
                         >
                           <option value="AC">AC</option>
                           <option value="AL">AL</option>
@@ -410,7 +410,7 @@ export default function Checkout() {
                       <button
                         onClick={handleCalcularFrete}
                         disabled={carregando}
-                        className="btn-primary w-full disabled:opacity-50 mt-2"
+                        className="btn-primary w-full disabled:opacity-50 mt-1 h-11 text-sm font-bold"
                       >
                         {carregando ? 'Calculando...' : 'Calcular Frete'}
                       </button>
@@ -421,32 +421,32 @@ export default function Checkout() {
 
               {/* Etapa 2: Frete */}
               {(etapa === 'frete' || etapa === 'pagamento') && opcoesFrete.length > 0 && (
-                <div className="bg-[#1e293b] p-5 sm:p-6 rounded-xl border border-slate-800 shadow-lg">
-                  <div className="flex items-center gap-3 mb-6">
-                    <Truck className="w-6 h-6 text-indigo-400" />
-                    <h2 className="text-xl sm:text-2xl font-bold">Opções de Frete</h2>
+                <div className="bg-[#1e293b] p-4 sm:p-5 rounded-xl border border-slate-800 shadow-lg">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Truck className="w-5 h-5 text-indigo-400" />
+                    <h2 className="text-lg font-bold">Opções de Frete</h2>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {opcoesFrete.map((opcao) => (
                       <div
                         key={opcao.id}
                         onClick={() => setFrete(opcao)}
-                        className={`p-4 rounded-xl border-2 cursor-pointer transition ${
+                        className={`p-3 rounded-xl border-2 cursor-pointer transition ${
                           frete?.id === opcao.id
                             ? 'border-indigo-500 bg-indigo-500/10'
                             : 'border-slate-700 hover:border-indigo-500/50'
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="font-semibold text-sm sm:text-base truncate">{opcao.nome}</p>
-                            <p className="text-xs sm:text-sm text-slate-400">
+                            <p className="font-semibold text-sm truncate">{opcao.nome}</p>
+                            <p className="text-xs text-slate-400">
                               Entrega em {opcao.prazo} dia{opcao.prazo > 1 ? 's' : ''} úteis
                             </p>
                           </div>
                           <div className="text-right flex-shrink-0">
-                            <p className="text-base sm:text-lg font-bold text-indigo-400">
+                            <p className="text-base font-bold text-indigo-400">
                               R$ {opcao.preco.toFixed(2)}
                             </p>
                           </div>
@@ -458,7 +458,7 @@ export default function Checkout() {
                   {etapa === 'frete' && (
                     <button
                       onClick={() => setEtapa('pagamento')}
-                      className="btn-primary w-full mt-6"
+                      className="btn-primary w-full mt-4 h-11 text-sm font-bold"
                     >
                       Continuar para Pagamento
                     </button>
@@ -468,14 +468,14 @@ export default function Checkout() {
 
               {/* Etapa 3: Pagamento */}
               {etapa === 'pagamento' && (
-                <div className="bg-[#1e293b] p-5 sm:p-6 rounded-xl border border-slate-800 shadow-lg">
-                  <div className="flex items-center gap-3 mb-6">
-                    <CreditCard className="w-6 h-6 text-indigo-400" />
-                    <h2 className="text-xl sm:text-2xl font-bold">Método de Pagamento</h2>
+                <div className="bg-[#1e293b] p-4 sm:p-5 rounded-xl border border-slate-800 shadow-lg">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CreditCard className="w-5 h-5 text-indigo-400" />
+                    <h2 className="text-lg font-bold">Método de Pagamento</h2>
                   </div>
 
-                  <div className="space-y-4">
-                    <label className="flex items-start p-4 border-2 rounded-xl cursor-pointer transition"
+                  <div className="space-y-3">
+                    <label className="flex items-start p-3 border-2 rounded-xl cursor-pointer transition"
                       style={{
                         borderColor: metodo_pagamento === 'whatsapp' ? '#6366f1' : '#334155',
                         backgroundColor: metodo_pagamento === 'whatsapp' ? 'rgba(99, 102, 241, 0.1)' : 'transparent'
@@ -489,12 +489,12 @@ export default function Checkout() {
                         className="mt-1 mr-3"
                       />
                       <div>
-                        <p className="font-bold text-sm sm:text-base">WhatsApp (Recomendado)</p>
-                        <p className="text-xs sm:text-sm text-slate-400">Finalize o pedido e combine o pagamento diretamente com o vendedor</p>
+                        <p className="font-bold text-sm">WhatsApp (Recomendado)</p>
+                        <p className="text-xs text-slate-400">Finalize o pedido e combine o pagamento diretamente com o vendedor</p>
                       </div>
                     </label>
 
-                    <label className="flex items-start p-4 border-2 rounded-xl cursor-pointer transition"
+                    <label className="flex items-start p-3 border-2 rounded-xl cursor-pointer transition"
                       style={{
                         borderColor: metodo_pagamento === 'cartao' ? '#6366f1' : '#334155',
                         backgroundColor: metodo_pagamento === 'cartao' ? 'rgba(99, 102, 241, 0.1)' : 'transparent'
@@ -508,13 +508,13 @@ export default function Checkout() {
                         className="mt-1 mr-3"
                       />
                       <div>
-                        <p className="font-bold text-sm sm:text-base">Cartão de Crédito</p>
-                        <p className="text-xs sm:text-sm text-slate-400">Pagamento online seguro e imediato</p>
+                        <p className="font-bold text-sm">Cartão de Crédito</p>
+                        <p className="text-xs text-slate-400">Pagamento online seguro e imediato</p>
                       </div>
                     </label>
 
                     {metodo_pagamento === 'cartao' && (
-                      <div className="grid grid-cols-1 gap-4 mt-4 animate-in fade-in slide-in-from-top-4">
+                      <div className="grid grid-cols-1 gap-2 mt-2 animate-in fade-in slide-in-from-top-4">
                         <div>
                           <label htmlFor="titular" className="sr-only">Nome no Cartão</label>
                           <input
@@ -524,7 +524,7 @@ export default function Checkout() {
                             placeholder="Nome no Cartão"
                             value={pagamento.titular}
                             onChange={(e) => setPagamento({ ...pagamento, titular: e.target.value })}
-                            className="input-field bg-[#0f172a] border-slate-700"
+                            className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm"
                           />
                         </div>
                         <div>
@@ -536,10 +536,10 @@ export default function Checkout() {
                             placeholder="Número do Cartão"
                             value={pagamento.numero}
                             onChange={(e) => setPagamento({ ...pagamento, numero: e.target.value })}
-                            className="input-field bg-[#0f172a] border-slate-700"
+                            className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm"
                           />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-2">
                           <div>
                             <label htmlFor="validade" className="sr-only">Validade (MM/AA)</label>
                             <input
@@ -549,7 +549,7 @@ export default function Checkout() {
                               placeholder="Validade (MM/AA)"
                               value={pagamento.validade}
                               onChange={(e) => setPagamento({ ...pagamento, validade: e.target.value })}
-                              className="input-field bg-[#0f172a] border-slate-700"
+                              className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm"
                             />
                           </div>
                           <div>
@@ -561,7 +561,7 @@ export default function Checkout() {
                               placeholder="CVV"
                               value={pagamento.cvv}
                               onChange={(e) => setPagamento({ ...pagamento, cvv: e.target.value })}
-                              className="input-field bg-[#0f172a] border-slate-700"
+                              className="input-field bg-[#0f172a] border-slate-700 h-10 text-sm"
                             />
                           </div>
                         </div>
@@ -571,7 +571,7 @@ export default function Checkout() {
                     <button
                       onClick={handleConfirmarPagamento}
                       disabled={carregando}
-                      className="btn-primary w-full mt-6 py-4 font-bold"
+                      className="btn-primary w-full mt-4 h-12 font-bold text-sm"
                     >
                       {carregando ? 'Processando...' : `Confirmar ${metodo_pagamento === 'whatsapp' ? 'via WhatsApp' : 'Pagamento'}`}
                     </button>
@@ -582,41 +582,41 @@ export default function Checkout() {
 
             {/* Resumo do Pedido */}
             <div className="lg:col-span-1">
-              <div className="bg-[#1e293b] p-5 sm:p-6 rounded-xl sticky top-20 border border-slate-800 shadow-xl">
-                <h3 className="text-lg sm:text-xl font-bold mb-6">Resumo do Pedido</h3>
+              <div className="bg-[#1e293b] p-4 sm:p-5 rounded-xl sticky top-20 border border-slate-800 shadow-xl">
+                <h3 className="text-lg font-bold mb-4">Resumo do Pedido</h3>
 
-                <div className="space-y-3 mb-6 pb-6 border-b border-slate-700">
-                  <div className="flex justify-between text-sm">
+                <div className="space-y-2 mb-4 pb-4 border-b border-slate-700">
+                  <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-slate-400">Subtotal</span>
                     <span>R$ {carrinho.subtotal.toFixed(2)}</span>
                   </div>
                   {carrinho.desconto > 0 && (
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span className="text-slate-400">Desconto</span>
                       <span className="text-emerald-400">- R$ {carrinho.desconto.toFixed(2)}</span>
                     </div>
                   )}
                   {frete && (
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span className="text-slate-400">Frete</span>
                       <span>R$ {frete.preco.toFixed(2)}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-between text-xl font-bold mb-6">
+                <div className="flex justify-between text-lg font-bold mb-4">
                   <span>Total</span>
                   <span className="text-amber-500">
                     R$ {totalFinal.toFixed(2)}
                   </span>
                 </div>
 
-                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                   {carrinho.itens.map((item) => {
                     const produto = PRODUTOS.find(p => p.id === item.produto_id);
                     return (
-                      <div key={item.produto_id} className="flex gap-3 text-sm">
-                        <div className="w-12 h-12 bg-white rounded p-1 flex-shrink-0">
+                      <div key={item.produto_id} className="flex gap-2 text-xs">
+                        <div className="w-10 h-10 bg-white rounded p-1 flex-shrink-0">
                           <img src={produto?.imagem} alt="" className="w-full h-full object-contain" />
                         </div>
                         <div className="flex-1 min-w-0">

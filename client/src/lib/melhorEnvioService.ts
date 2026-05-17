@@ -2,11 +2,14 @@
  * Serviço de Integração com API Frenet
  * Cálculo de frete em tempo real
  * 
- * Usando Proxy do Netlify (/api/frenet) para evitar erros de CORS
+ * Usando CORS Proxy Direto para evitar erros 404/CORS no Netlify
  */
 
-const API_URL = '/api/frenet';
+const FRENET_API_URL = 'https://api.frenet.com.br/api';
 const FRENET_TOKEN = '0D9AED5DR0AB7R4086R96AARD1BC23F46D81';
+
+// Usando um CORS Proxy direto para evitar dependência do netlify.toml
+const CORS_PROXY = 'https://corsproxy.io/?';
 
 export interface ProdutoFrete {
   id: string;
@@ -52,7 +55,7 @@ export interface CalculoFrete {
 }
 
 /**
- * Calcula opções de frete reais via Proxy do Netlify
+ * Calcula opções de frete reais via CORS Proxy Direto
  */
 export async function calcularFrete(
   produtos: ProdutoFrete[],
@@ -84,9 +87,11 @@ export async function calcularFrete(
       ShipmentDiameter: 0,
     };
 
-    // Chamada através do proxy configurado no netlify.toml
-    // A API da Frenet exige o header 'token' em vez de 'Authorization' em alguns endpoints
-    const response = await fetch(`${API_URL}/Shipping`, {
+    // Chamada via CORS Proxy para evitar erros de CORS e 404
+    const targetUrl = `${FRENET_API_URL}/Shipping`;
+    const proxyUrl = `${CORS_PROXY}${encodeURIComponent(targetUrl)}`;
+
+    const response = await fetch(proxyUrl, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -221,7 +226,10 @@ export async function buscarCEP(cep: string): Promise<EnderecoEntrega | null> {
 
 export async function rastrearEnvio(numero_rastreamento: string): Promise<any> {
   try {
-    const response = await fetch(`${API_URL}/Tracking/${numero_rastreamento}`, {
+    const targetUrl = `${FRENET_API_URL}/Tracking/${numero_rastreamento}`;
+    const proxyUrl = `${CORS_PROXY}${encodeURIComponent(targetUrl)}`;
+    
+    const response = await fetch(proxyUrl, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
